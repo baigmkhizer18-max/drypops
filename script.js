@@ -77,7 +77,7 @@ const DB_API = {
             name: 'Olive Oil', 
             category: 'Oils', 
             stock: 15, 
-            image: 'images/olive (1).png', 
+            image: 'images/olive (1) .png', 
             desc: 'Pure Extra Virgin Olive Oil, cold pressed for cooking, salads and skin care.',
             nutrition: 'Monounsaturated Fats: 73%, Rich in Vitamin E and polyphenol antioxidants.',
             benefits: 'Supports heart health, reduces inflammation, and nourishes skin and hair.',
