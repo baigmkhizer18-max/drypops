@@ -1,26 +1,11 @@
 const DB_API = {
     products: [
         { 
-            id: 'df-1', 
-            name: 'Organic Almonds', 
-            category: 'Dry Fruits', 
-            stock: 45, 
-            image: 'images/almond.png', 
-            desc: 'Premium Kagzi Soft Shell Badam harvested directly from Skardu orchards. Rich in Vit E and healthy fats.',
-            nutrition: 'Energy: 579 kcal, Protein: 21g, Healthy Fats: 49g, Fiber: 12g (per 100g)',
-            benefits: 'Boosts brain memory, improves cholesterol, and provides long-lasting natural stamina.',
-            weights: [
-                { label: '50g', price: 450 },
-                { label: '100g', price: 850 },
-                { label: '200g', price: 1600 }
-            ]
-        },
-        { 
             id: 'df-2', 
             name: 'Sweet Raisins', 
             category: 'Dry Fruits', 
             stock: 60, 
-            image: 'images/raisins.png', 
+            image: 'images/230b718c-4750-4bac-ab72-3e0ad1c780a3 (1).png', 
             desc: 'Fresh Green Sundekhani Kishmish naturally sun-dried without added preservatives.',
             nutrition: 'Energy: 299 kcal, Potassium: 749mg, Fiber: 3.7g (per 100g)',
             benefits: 'Aids digestive health, supports iron absorption, and works as an instant energy boost.',
@@ -32,32 +17,17 @@ const DB_API = {
         },
         { 
             id: 'df-3', 
-            name: 'Roasted Pistachios', 
+            name: 'Dry Dates', 
             category: 'Dry Fruits', 
-            stock: 25, 
-            image: 'images/pistachio.png', 
-            desc: 'Lightly salted and roasted Irani Jumbo Pista nuts.',
-            nutrition: 'Energy: 562 kcal, Protein: 20g, Fiber: 10g (per 100g)',
-            benefits: 'Rich in antioxidants, promotes eye health, and helps control blood sugar levels.',
+            stock: 40, 
+            image: 'images/dry dates (1).png', 
+            desc: 'Premium sun-dried Chuhara (Khajoor) dates, naturally sweet and soft.',
+            nutrition: 'Energy: 282 kcal, Potassium: 656mg, Fiber: 8g (per 100g)',
+            benefits: 'Gives instant natural energy, supports digestion, and is rich in iron and minerals.',
             weights: [
-                { label: '50g', price: 650 },
-                { label: '100g', price: 1250 },
-                { label: '200g', price: 2400 }
-            ]
-        },
-        { 
-            id: 'df-4', 
-            name: 'Jumbo Cashews', 
-            category: 'Dry Fruits', 
-            stock: 30, 
-            image: 'images/cashew.png', 
-            desc: 'Crispy Roasted Kaju W240 grade cashew kernels.',
-            nutrition: 'Energy: 553 kcal, Magnesium: 292mg, Protein: 18g (per 100g)',
-            benefits: 'Strengthens bones, promotes heart health, and serves as an excellent mineral provider.',
-            weights: [
-                { label: '50g', price: 550 },
-                { label: '100g', price: 1050 },
-                { label: '200g', price: 2000 }
+                { label: '50g', price: 200 },
+                { label: '100g', price: 380 },
+                { label: '200g', price: 720 }
             ]
         },
         { 
@@ -70,9 +40,8 @@ const DB_API = {
             nutrition: 'Monounsaturated Fats: 60%, Omega-3 & Omega-6 balance.',
             benefits: 'Stimulates hair growth, improves cardiovascular wellness, and enhances meal flavor.',
             weights: [
-                { label: '50ml', price: 250 },
-                { label: '100ml', price: 450 },
-                { label: '200ml', price: 850 }
+                { label: '120ml', price: 250 },
+                { label: '250ml', price: 450 },
             ]
         },
         { 
@@ -85,9 +54,8 @@ const DB_API = {
             nutrition: 'Lauric Acid: 50%, Healthy MCT Fatty Acids.',
             benefits: 'Deeply nourishes skin, boosts metabolic rate, and conditions dry hair naturally.',
             weights: [
-                { label: '50ml', price: 600 },
-                { label: '100ml', price: 1100 },
-                { label: '200ml', price: 2100 }
+                { label: '100ml', price: 600 },
+                { label: '200ml', price: 1100 },
             ]
         },
         { 
@@ -100,9 +68,22 @@ const DB_API = {
             nutrition: 'High Vitamin E concentration, Omega-9 oleic acid.',
             benefits: 'Enhances facial glow, relieves constipation when consumed, and soothes scalp.',
             weights: [
-                { label: '50ml', price: 650 },
-                { label: '100ml', price: 1450 },
-                { label: '200ml', price: 2700 }
+                { label: '120ml', price: 650 },
+                { label: '250ml', price: 1450 },
+            ]
+        },
+        { 
+            id: 'ol-4', 
+            name: 'Olive Oil', 
+            category: 'Oils', 
+            stock: 15, 
+            image: 'images/olive (1).png', 
+            desc: 'Pure Extra Virgin Olive Oil, cold pressed for cooking, salads and skin care.',
+            nutrition: 'Monounsaturated Fats: 73%, Rich in Vitamin E and polyphenol antioxidants.',
+            benefits: 'Supports heart health, reduces inflammation, and nourishes skin and hair.',
+            weights: [
+                { label: '120ml', price: 500 },
+                { label: '250ml', price: 950 },
             ]
         },
         { 
@@ -115,9 +96,9 @@ const DB_API = {
             nutrition: 'Natural Fructose & Glucose, Enzymes, Antimicrobial Agents.',
             benefits: 'Soothes sore throats, reinforces immune system, and acts as a natural sweetener.',
             weights: [
-                { label: '50g', price: 650 },
-                { label: '100g', price: 1200 },
-                { label: '200g', price: 2200 }
+                { label: '125g', price: 650 },
+                { label: '250g', price: 1200 },
+                { label: '500g', price: 2200 }
             ]
         },
         { 
@@ -179,11 +160,41 @@ const DB_API = {
                 { label: '100g', price: 650 },
                 { label: '200g', price: 1200 }
             ]
+        },
+        { 
+            id: 'sl-1', 
+            name: 'Himalayan Pink Salt', 
+            category: 'Salt', 
+            stock: 50, 
+            image: 'images/salt pink (1).png', 
+            desc: 'Natural rock salt from the Khewra mines, unrefined and free from additives.',
+            nutrition: 'Sodium: ~38g, naturally contains trace minerals like magnesium, calcium and potassium (per 100g).',
+            benefits: 'Adds rich flavor to food, provides trace minerals, and is a purer alternative to refined table salt.',
+            weights: [
+                { label: '50g', price: 80 },
+                { label: '100g', price: 150 },
+                { label: '200g', price: 280 }
+            ]
+        },
+        { 
+            id: 'sl-2', 
+            name: 'Black Salt', 
+            category: 'Salt', 
+            stock: 50, 
+            image: 'images/salt black (1).png', 
+            desc: 'Traditional Kala Namak with a distinct tangy flavor, perfect for chaat, raita and fruits.',
+            nutrition: 'Sodium: ~36g, contains sulphur compounds and trace minerals (per 100g).',
+            benefits: 'Aids digestion, helps relieve bloating and gas, and adds a unique taste to snacks.',
+            weights: [
+                { label: '50g', price: 80 },
+                { label: '100g', price: 150 },
+                { label: '200g', price: 280 }
+            ]
         }
     ],
     orders: []
 };
-
+ 
 /* =====================================================================
    SHOP SETTINGS - edit these values when you are ready
    ===================================================================== */
@@ -192,25 +203,25 @@ const SHOP_CONFIG = {
     // 0 = delivery is free for every order (shipping rate not decided yet).
     SHIPPING_FEE: 0,
     FREE_SHIPPING_MIN: 2000,
-
+ 
     WHATSAPP_NUMBER: '923282288801',
-
+ 
     // Optional: URL of your backend that receives new orders (POST, JSON).
     // Leave empty until your seller dashboard / backend is ready.
     ORDER_API_URL: '',
-
+ 
     // Coupon code -> discount percent
     COUPONS: { ORGANIC10: 10 }
 };
-
+ 
 const PLACEHOLDER_IMG = "data:image/svg+xml;utf8," + encodeURIComponent(
     "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='400' height='400' fill='#FAF6F0'/>" +
     "<text x='200' y='215' font-size='64' text-anchor='middle'>🌿</text></svg>");
-
+ 
 const PAYMENT_LABELS = { COD: 'Cash on Delivery', WALLET: 'JazzCash / Easypaisa' };
 const FILTER_ACTIVE = ['bg-olive', 'text-white', 'hover:bg-oliveHover'];
 const FILTER_INACTIVE = ['text-darkText', 'dark:text-cream', 'hover:bg-goldenLight/40', 'dark:hover:bg-slate-700'];
-
+ 
 /* ===================== helpers ===================== */
 function loadStored(key) {
     try {
@@ -228,8 +239,8 @@ function formatPrice(n) { return 'Rs. ' + Number(n).toLocaleString(); }
 function getProduct(id) { return DB_API.products.find(p => p.id === id); }
 // Image paths in DB_API already include the folder (e.g. 'public/almond.jpg'),
 // so do NOT add another folder in front.
-function imgSrc(p) { return '/' + encodeURI(p.image.replace(/^public\//, '')); }
-
+function imgSrc(p) { return encodeURI(p.image.replace(/^public\//, '')); }
+ 
 /* ===================== state ===================== */
 let cart = loadStored('drypops-cart');
 let wishlist = loadStored('drypops-wishlist');
@@ -237,7 +248,7 @@ let customBox = [];
 let appliedDiscountPercent = 0;
 let currentCategory = 'all';
 let toastTimer = null;
-
+ 
 function sanitizeStoredState() {
     // Re-price saved cart lines from the current catalogue and drop anything invalid
     cart = cart.filter(item => item && typeof item.title === 'string' && item.quantity > 0).map(item => {
@@ -252,7 +263,7 @@ function sanitizeStoredState() {
     }).filter(Boolean);
     wishlist = wishlist.filter(id => typeof id === 'string' && getProduct(id));
 }
-
+ 
 window.addEventListener('DOMContentLoaded', () => {
     if (window.AOS) {
         AOS.init({ duration: 800, once: true, offset: 100, easing: 'ease-out-cubic' });
@@ -262,7 +273,7 @@ window.addEventListener('DOMContentLoaded', () => {
     renderBoxBuilderOptions();
     updateCartUI();
     refreshWishlistUI();
-
+ 
     // Close modals with Escape or by clicking the dark backdrop
     document.addEventListener('keydown', e => {
         if (e.key !== 'Escape') return;
@@ -274,11 +285,11 @@ window.addEventListener('DOMContentLoaded', () => {
         if (e.target.id === 'searchModal') toggleSearchModal();
     });
 });
-
+ 
 function refreshAOS() {
     if (window.AOS) setTimeout(() => AOS.refreshHard ? AOS.refreshHard() : AOS.refresh(), 100);
 }
-
+ 
 /* ===================== navigation ===================== */
 function showView(viewId, noScroll) {
     document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
@@ -290,7 +301,7 @@ function showView(viewId, noScroll) {
     }
     closeMobileMenu();
 }
-
+ 
 function goToSection(id) {
     closeMobileMenu();
     const el = document.getElementById(id);
@@ -301,7 +312,7 @@ function goToSection(id) {
         if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 80);
 }
-
+ 
 function toggleMobileMenu() {
     const menu = document.getElementById('mobileMenu');
     const open = menu.classList.toggle('hidden') === false;
@@ -315,7 +326,7 @@ function closeMobileMenu() {
     document.getElementById('mobileMenuBtn').setAttribute('aria-expanded', 'false');
     document.getElementById('mobileMenuIcon').className = 'fa-solid fa-bars';
 }
-
+ 
 function filterCategory(cat) {
     currentCategory = cat;
     const homeHidden = document.getElementById('view-home').classList.contains('hidden');
@@ -326,7 +337,7 @@ function filterCategory(cat) {
         document.getElementById('categoryFilterBar').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, homeHidden ? 120 : 0);
 }
-
+ 
 function applyCategoryFilter() {
     document.querySelectorAll('.category-section').forEach(s => {
         s.classList.toggle('hidden', currentCategory !== 'all' && s.dataset.category !== currentCategory);
@@ -338,10 +349,10 @@ function applyCategoryFilter() {
     });
     refreshAOS();
 }
-
+ 
 /* ===================== stock helpers ===================== */
 function itemProducts(item) { return item.components ? item.components : [item.id]; }
-
+ 
 function unitsInCart(productId) {
     return cart.reduce((sum, item) => sum + item.quantity * itemProducts(item).filter(id => id === productId).length, 0);
 }
@@ -361,12 +372,12 @@ function stockProblem(ids) {
     }
     return null;
 }
-
+ 
 /* ===================== product cards ===================== */
 function wishButton(productId, extra) {
     return `<button type="button" data-id="${productId}" onclick="toggleWishlist('${productId}')" aria-label="Add to wishlist" class="wish-btn ${extra}"><i class="fa-solid fa-heart"></i></button>`;
 }
-
+ 
 function updateCardWeightPrice(productId, selectEl) {
     const product = getProduct(productId);
     if (!product) return;
@@ -379,15 +390,15 @@ function updateCardWeightPrice(productId, selectEl) {
         setTimeout(() => priceDisplay.classList.remove('scale-110'), 200);
     }
 }
-
+ 
 function renderHomePageProducts() {
     const container = document.getElementById('dynamicProductsContainer');
-    const categories = ['Dry Fruits', 'Oils', 'Honey', 'Seeds'];
-
+    const categories = ['Dry Fruits', 'Oils', 'Honey', 'Seeds', 'Salt'];
+ 
     container.innerHTML = categories.map((cat, idx) => {
         const catProducts = DB_API.products.filter(p => p.category === cat);
         const sectionId = cat.toLowerCase().replace(' ', '-');
-
+ 
         return `
             <section id="${sectionId}" data-category="${cat}" class="category-section py-14 ${idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-cream dark:bg-slate-950'} border-t border-goldenHoney/20">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -411,20 +422,20 @@ function renderHomePageProducts() {
                                     </div>
                                     <h3 class="font-bold text-deepBrown dark:text-cream text-base group-hover:text-olive transition-colors cursor-pointer" onclick="openProductDetail('${p.id}')">${escapeHtml(p.name)}</h3>
                                     <p class="text-xs text-darkText/70 dark:text-slate-400 line-clamp-1 mt-0.5">${escapeHtml(p.desc)}</p>
-
+ 
                                     <div class="mt-3">
                                         <label for="weight-select-${p.id}" class="block text-[11px] font-bold text-darkText/60 dark:text-slate-400 mb-1">Select Weight / Size:</label>
                                         <select id="weight-select-${p.id}" onchange="updateCardWeightPrice('${p.id}', this)" class="w-full bg-white dark:bg-slate-700 text-xs font-semibold p-2 rounded-xl border border-goldenHoney/30 focus:outline-none focus:border-goldenHoney">
                                             ${p.weights.map(w => `<option value="${w.label}">${w.label} - ${formatPrice(w.price)}</option>`).join('')}
                                         </select>
                                     </div>
-
+ 
                                     <div class="mt-2 text-[11px] font-semibold ${p.stock < 10 ? 'text-red-500' : 'text-darkText/50 dark:text-slate-400'} flex items-center gap-1">
                                         <span class="w-2 h-2 rounded-full ${soldOut ? 'bg-red-500' : p.stock < 10 ? 'bg-red-500 animate-ping' : 'bg-emerald-500'}"></span>
                                         ${soldOut ? 'Out of stock' : p.stock < 10 ? `Only ${p.stock} left` : `Stock: ${p.stock} units`}
                                     </div>
                                 </div>
-
+ 
                                 <div class="mt-4 flex items-center justify-between pt-3 border-t border-goldenHoney/20">
                                     <span id="price-display-${p.id}" class="font-extrabold text-goldenHoney text-base transition-transform duration-200">${formatPrice(defaultWeight.price)}</span>
                                     <button type="button" onclick="addSelectedWeightToCart('${p.id}')" ${soldOut ? 'disabled' : ''} class="bg-olive hover:bg-oliveHover text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-md btn-shine disabled:opacity-50 disabled:cursor-not-allowed">
@@ -439,11 +450,11 @@ function renderHomePageProducts() {
             </section>
         `;
     }).join('');
-
+ 
     applyCategoryFilter();
     refreshWishlistUI();
 }
-
+ 
 function addSelectedWeightToCart(productId) {
     const product = getProduct(productId);
     if (!product) return;
@@ -453,15 +464,15 @@ function addSelectedWeightToCart(productId) {
     if (!weightObj) return;
     addToCart({ id: product.id, title: `${product.name} (${label})`, price: weightObj.price, weightLabel: label });
 }
-
+ 
 function openProductDetail(productId) {
     const product = getProduct(productId);
     if (!product) return;
-
+ 
     const defaultWeight = product.weights[0];
     const soldOut = product.stock <= 0;
     const container = document.getElementById('productDetailContainer');
-
+ 
     container.innerHTML = `
         <div class="rounded-3xl overflow-hidden border border-goldenHoney/30 shadow-2xl bg-white dark:bg-slate-800">
             <img src="${imgSrc(product)}" alt="${escapeHtml(product.name)}" onerror="this.onerror=null;this.src=PLACEHOLDER_IMG" class="w-full h-72 sm:h-[420px] object-cover hover:scale-105 transition-transform duration-700">
@@ -472,16 +483,16 @@ function openProductDetail(productId) {
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-deepBrown dark:text-cream mt-2">${escapeHtml(product.name)}</h1>
                 <p id="detailPriceDisplay" class="text-3xl font-extrabold text-goldenHoney mt-2">${formatPrice(defaultWeight.price)}</p>
             </div>
-
+ 
             <p class="text-sm text-darkText/80 dark:text-slate-300 leading-relaxed">${escapeHtml(product.desc)}</p>
-
+ 
             <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-goldenHoney/30 shadow-sm">
                 <label for="detailWeightSelect" class="block text-xs font-bold text-deepBrown dark:text-goldenLight mb-2">Choose Weight / Pack Size:</label>
                 <select id="detailWeightSelect" onchange="updateDetailPrice('${product.id}', this.value)" class="w-full bg-cream dark:bg-slate-700 text-xs font-bold p-3 rounded-xl border border-goldenHoney/40 focus:outline-none focus:border-goldenHoney">
                     ${product.weights.map(w => `<option value="${w.label}">${w.label} - ${formatPrice(w.price)}</option>`).join('')}
                 </select>
             </div>
-
+ 
             <div class="space-y-3 text-xs">
                 <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-goldenHoney/20 shadow-sm">
                     <h4 class="font-bold text-deepBrown dark:text-goldenLight mb-1 flex items-center"><i class="fa-solid fa-heart-pulse mr-2 text-goldenHoney"></i> Health Benefits</h4>
@@ -492,7 +503,7 @@ function openProductDetail(productId) {
                     <p class="text-darkText/80 dark:text-slate-300">${escapeHtml(product.nutrition)}</p>
                 </div>
             </div>
-
+ 
             <div class="flex items-center gap-4">
                 <button type="button" onclick="addDetailViewToCart('${product.id}')" ${soldOut ? 'disabled' : ''} class="flex-1 bg-olive hover:bg-oliveHover text-white font-bold py-3.5 rounded-xl text-xs shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 btn-shine disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fa-solid fa-basket-shopping"></i> ${soldOut ? 'Out of Stock' : 'Add Selected Weight To Cart'}
@@ -504,14 +515,14 @@ function openProductDetail(productId) {
     refreshWishlistUI();
     showView('product-detail');
 }
-
+ 
 function updateDetailPrice(productId, label) {
     const product = getProduct(productId);
     if (!product) return;
     const weightObj = product.weights.find(w => w.label === label);
     if (weightObj) document.getElementById('detailPriceDisplay').innerText = formatPrice(weightObj.price);
 }
-
+ 
 function addDetailViewToCart(productId) {
     const product = getProduct(productId);
     if (!product) return;
@@ -521,12 +532,12 @@ function addDetailViewToCart(productId) {
     if (!weightObj) return;
     addToCart({ id: product.id, title: `${product.name} (${label})`, price: weightObj.price, weightLabel: label });
 }
-
+ 
 /* ===================== custom gift box ===================== */
 function renderBoxBuilderOptions() {
     const container = document.getElementById('boxBuilderOptions');
     const selectable = DB_API.products.slice(0, 6);
-
+ 
     container.innerHTML = selectable.map(p => `
         <div class="interactive-card bg-white dark:bg-slate-800 p-4 rounded-2xl border border-goldenHoney/30 flex flex-col justify-between">
             <div>
@@ -541,11 +552,11 @@ function renderBoxBuilderOptions() {
         </div>
     `).join('');
 }
-
+ 
 function addBoxItemWithWeight(productId) {
     const product = getProduct(productId);
     if (!product) return;
-
+ 
     if (customBox.length >= 4) {
         showToast('Maximum 4 items allowed in custom box!');
         return;
@@ -553,18 +564,18 @@ function addBoxItemWithWeight(productId) {
     const label = document.getElementById(`box-weight-${productId}`).value;
     const weightObj = product.weights.find(w => w.label === label);
     if (!weightObj) return;
-
+ 
     const problem = stockProblem([...customBox.map(i => i.id), productId]);
     if (problem) {
         showToast(`Sorry, not enough ${problem} in stock`);
         return;
     }
-
+ 
     customBox.push({ id: product.id, name: `${product.name} (${label})`, price: weightObj.price });
     updateBoxUI();
     showToast(`Added ${product.name} (${label}) to custom box`);
 }
-
+ 
 function updateBoxUI() {
     const list = document.getElementById('customBoxList');
     const total = document.getElementById('customBoxTotal');
@@ -582,12 +593,12 @@ function updateBoxUI() {
     `).join('');
     total.innerText = formatPrice(sum);
 }
-
+ 
 function removeBoxItem(index) {
     customBox.splice(index, 1);
     updateBoxUI();
 }
-
+ 
 function addCustomBoxToCart() {
     if (customBox.length === 0) {
         showToast('Add items to your custom box first!');
@@ -609,7 +620,7 @@ function addCustomBoxToCart() {
         updateBoxUI();
     }
 }
-
+ 
 /* ===================== cart ===================== */
 // Returns true when the item was added
 function addToCart(item) {
@@ -629,26 +640,26 @@ function addToCart(item) {
     showToast(`Added "${item.title}" to cart!`);
     return true;
 }
-
+ 
 function updateCartUI() {
     const cartCountEl = document.getElementById('cartCount');
     const cartItemsList = document.getElementById('cartItemsList');
     const cartTotalEl = document.getElementById('cartTotal');
-
+ 
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     saveStored('drypops-cart', cart);
-
+ 
     cartCountEl.innerText = totalItems;
     cartCountEl.classList.add('scale-125');
     setTimeout(() => cartCountEl.classList.remove('scale-125'), 200);
     cartTotalEl.innerText = formatPrice(totalPrice);
-
+ 
     if (cart.length === 0) {
         cartItemsList.innerHTML = `<p class="text-center text-slate-400 text-xs py-8">Your cart is empty.</p>`;
         return;
     }
-
+ 
     cartItemsList.innerHTML = cart.map((item, index) => `
         <div class="flex items-center justify-between gap-3 bg-cream/60 dark:bg-slate-800 p-3 rounded-xl border border-goldenHoney/20 animate-fadeInUp">
             <div class="min-w-0">
@@ -664,7 +675,7 @@ function updateCartUI() {
         </div>
     `).join('');
 }
-
+ 
 function changeQty(index, delta) {
     const item = cart[index];
     if (!item) return;
@@ -680,7 +691,7 @@ function changeQty(index, delta) {
     updateCartUI();
     if (!document.getElementById('view-checkout').classList.contains('hidden')) renderCheckoutSummary();
 }
-
+ 
 /* ===================== pricing ===================== */
 function calcShipping(subtotal) {
     return subtotal >= SHOP_CONFIG.FREE_SHIPPING_MIN ? 0 : SHOP_CONFIG.SHIPPING_FEE;
@@ -691,7 +702,7 @@ function calcTotals() {
     const shipping = cart.length ? calcShipping(subtotal) : 0;
     return { subtotal, discount, shipping, total: subtotal - discount + shipping };
 }
-
+ 
 /* ===================== checkout ===================== */
 function proceedToCheckout() {
     if (cart.length === 0) {
@@ -702,12 +713,12 @@ function proceedToCheckout() {
     renderCheckoutSummary();
     showView('checkout');
 }
-
+ 
 function applyCouponCode() {
     const code = document.getElementById('couponCodeInput').value.trim().toUpperCase();
     const msgEl = document.getElementById('couponMsg');
     const percent = SHOP_CONFIG.COUPONS[code];
-
+ 
     if (percent) {
         appliedDiscountPercent = percent;
         msgEl.innerText = `Coupon applied! ${percent}% discount subtracted.`;
@@ -719,11 +730,11 @@ function applyCouponCode() {
     }
     renderCheckoutSummary();
 }
-
+ 
 function renderCheckoutSummary() {
     const container = document.getElementById('checkoutItemsList');
     const t = calcTotals();
-
+ 
     container.innerHTML = cart.map(item => `
         <div class="flex justify-between items-center pt-2 gap-3">
             <div>
@@ -734,17 +745,17 @@ function renderCheckoutSummary() {
             <span class="font-bold text-goldenHoney whitespace-nowrap">${formatPrice(item.price * item.quantity)}</span>
         </div>
     `).join('');
-
+ 
     document.getElementById('coSubtotal').innerText = formatPrice(t.subtotal);
     document.getElementById('coDiscount').innerText = `- ${formatPrice(t.discount)}`;
     document.getElementById('coShipping').innerText = t.shipping === 0 ? 'FREE' : formatPrice(t.shipping);
     document.getElementById('coTotal').innerText = formatPrice(t.total);
 }
-
+ 
 function togglePaymentFields(method) {
     document.getElementById('walletNote').classList.toggle('hidden', method !== 'WALLET');
 }
-
+ 
 function buildOrderMessage(order) {
     const lines = [
         'Hi DryPops! I would like to confirm this order:',
@@ -766,16 +777,16 @@ function buildOrderMessage(order) {
     lines.push(`Total to pay: ${formatPrice(order.amount)}`);
     return `https://wa.me/${SHOP_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`;
 }
-
+ 
 function handleCheckoutSubmit(e) {
     e.preventDefault();
-
+ 
     if (cart.length === 0) {
         showToast('Your cart is empty!');
         showView('home');
         return;
     }
-
+ 
     const phoneEl = document.getElementById('coPhone');
     const phone = phoneEl.value.replace(/[\s-]/g, '');
     if (!/^(\+92|92|0)3\d{9}$/.test(phone)) {
@@ -783,7 +794,7 @@ function handleCheckoutSubmit(e) {
         phoneEl.focus();
         return;
     }
-
+ 
     // Re-check stock for the whole cart before placing the order
     const ids = [...new Set(cart.flatMap(itemProducts))];
     for (const id of ids) {
@@ -793,7 +804,7 @@ function handleCheckoutSubmit(e) {
             return;
         }
     }
-
+ 
     const t = calcTotals();
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
     const order = {
@@ -811,7 +822,7 @@ function handleCheckoutSubmit(e) {
         items: cart.map(i => ({ ...i })),
         date: new Date().toISOString()
     };
-
+ 
     // Reduce stock (per product, including gift-box components)
     cart.forEach(item => {
         itemProducts(item).forEach(id => {
@@ -819,16 +830,16 @@ function handleCheckoutSubmit(e) {
             if (p) p.stock -= item.quantity;
         });
     });
-
+ 
     DB_API.orders.push(order);
-
+ 
     // Send the order to the Seller Center backend (see orders-sync.js)
     if (typeof sendOrderToBackend === 'function') sendOrderToBackend(order);
-
+ 
     const note = paymentMethod === 'WALLET'
         ? 'We will message you on WhatsApp with our JazzCash / Easypaisa details. Your order is confirmed once payment is received.'
         : 'Please keep the amount ready. You pay when your order is delivered.';
-
+ 
     document.getElementById('orderSuccessSummary').innerHTML = `
         <p><strong>Order ID:</strong> <span class="text-goldenHoney font-extrabold">${order.ref}</span></p>
         <p><strong>Customer:</strong> ${escapeHtml(order.name)} (${escapeHtml(order.phone)})</p>
@@ -842,7 +853,7 @@ function handleCheckoutSubmit(e) {
         <p class="text-slate-500 dark:text-slate-400">${note}</p>
     `;
     document.getElementById('orderWhatsAppBtn').href = buildOrderMessage(order);
-
+ 
     // Reset checkout state
     cart = [];
     appliedDiscountPercent = 0;
@@ -854,7 +865,7 @@ function handleCheckoutSubmit(e) {
     renderHomePageProducts();
     showView('order-success');
 }
-
+ 
 function checkoutViaWhatsApp() {
     if (cart.length === 0) {
         showToast('Cart is empty!');
@@ -869,13 +880,13 @@ function checkoutViaWhatsApp() {
     lines.push('', `Total: ${formatPrice(t.total)}`);
     window.open(`https://wa.me/${SHOP_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener');
 }
-
+ 
 /* ===================== search ===================== */
 function handleSearch(query) {
     const results = document.getElementById('searchResults');
     const q = query.trim().toLowerCase();
     if (!q) { results.innerHTML = ''; return; }
-
+ 
     const filtered = DB_API.products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
     results.innerHTML = filtered.length === 0
         ? `<p class="p-3 text-slate-400">No products found</p>`
@@ -886,7 +897,7 @@ function handleSearch(query) {
             </div>
         `).join('');
 }
-
+ 
 function toggleSearchModal() {
     const modal = document.getElementById('searchModal');
     const box = document.getElementById('searchModalBox');
@@ -903,7 +914,7 @@ function toggleSearchModal() {
         setTimeout(() => modal.classList.add('hidden'), 300);
     }
 }
-
+ 
 /* ===================== wishlist ===================== */
 function toggleWishlist(productId) {
     const p = getProduct(productId);
@@ -919,7 +930,7 @@ function toggleWishlist(productId) {
     saveStored('drypops-wishlist', wishlist);
     refreshWishlistUI();
 }
-
+ 
 function refreshWishlistUI() {
     document.getElementById('wishlistCount').innerText = wishlist.length;
     document.querySelectorAll('.wish-btn').forEach(btn => {
@@ -928,7 +939,7 @@ function refreshWishlistUI() {
         btn.setAttribute('aria-label', on ? 'Remove from wishlist' : 'Add to wishlist');
     });
 }
-
+ 
 function showWishlistToast() {
     if (wishlist.length === 0) {
         showToast('Wishlist is empty!');
@@ -936,14 +947,14 @@ function showWishlistToast() {
     }
     showToast(`Wishlist: ${wishlist.map(id => getProduct(id).name).join(', ')}`);
 }
-
+ 
 /* ===================== misc UI ===================== */
 function showQuizResult(goal, suggestion) {
     const res = document.getElementById('quizResult');
     res.classList.remove('hidden');
     res.innerHTML = `<i class="fa-solid fa-circle-check text-olive mr-1"></i> For <strong>${escapeHtml(goal)}</strong>, we recommend: <u>${escapeHtml(suggestion)}</u>`;
 }
-
+ 
 function toggleCart() {
     const sidebar = document.getElementById('cartSidebar');
     const drawer = document.getElementById('cartDrawer');
@@ -959,12 +970,12 @@ function toggleCart() {
         setTimeout(() => sidebar.classList.add('hidden'), 400);
     }
 }
-
+ 
 function toggleDarkMode() {
     const isDark = document.documentElement.classList.toggle('dark');
     try { localStorage.setItem('drypops-theme', isDark ? 'dark' : 'light'); } catch (e) { /* ignore */ }
 }
-
+ 
 // There is no mailing-list backend yet, so the subscription is confirmed over WhatsApp
 function subscribeEmail(e) {
     e.preventDefault();
@@ -974,7 +985,7 @@ function subscribeEmail(e) {
     showToast('Send the WhatsApp message to finish subscribing');
     e.target.reset();
 }
-
+ 
 function showToast(msg) {
     const toast = document.getElementById('toast');
     document.getElementById('toastMsg').innerText = msg;

@@ -169,6 +169,7 @@
                     <a href="#oils" onclick="filterCategory('Oils'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Oils</a>
                     <a href="#honey" onclick="filterCategory('Honey'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Honey</a>
                     <a href="#seeds" onclick="filterCategory('Seeds'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Seeds</a>
+                    <a href="#salt" onclick="filterCategory('Salt'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Salt</a>
                     <a href="#box-builder" onclick="goToSection('box-builder'); return false;" class="text-goldenHoney font-bold flex items-center gap-1"><i class="fa-solid fa-gift"></i> Gift Box Builder</a>
                     <a href="#quiz" onclick="goToSection('quiz'); return false;" class="hover:text-goldenHoney transition-colors flex items-center gap-1"><i class="fa-solid fa-wand-magic-sparkles text-goldenHoney"></i> Find Your Mix</a>
                 </div>
@@ -193,7 +194,7 @@
                                 Fresh Dry Fruits, <span class="text-olive italic underline decoration-goldenHoney/40 decoration-wavy">Pure Oils</span>, Honey & Healthy Seeds
                             </h1>
                             <p class="text-darkText/80 dark:text-slate-300 text-sm sm:text-base max-w-xl mx-auto lg:mx-0 mt-5 leading-relaxed">
-                                Discover Pakistan's finest organic selection with custom weight options (50g, 100g, 200g). Handpicked almonds, pistachios, pure cold-pressed botanical oils, raw Sidr honey, and nutrient-dense seeds.
+                                Discover Pakistan's finest organic selection with custom weight options (50g, 100g, 200g). Handpicked raisins, dates, pure cold-pressed botanical oils, raw Sidr honey, and nutrient-dense seeds.
                             </p>
                             <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-8">
                                 <a href="#dynamicProductsContainer" onclick="filterCategory('all'); return false;" class="bg-olive hover:bg-oliveHover text-white font-bold px-7 py-3.5 rounded-xl text-sm shadow-lg hover:scale-105 active:scale-95 transition-all btn-shine">Explore Products</a>
@@ -245,6 +246,7 @@
                         <button type="button" data-category="Oils" onclick="filterCategory('Oils')" class="filter-btn px-4 py-2 rounded-xl whitespace-nowrap transition-all active:scale-95 text-darkText dark:text-cream hover:bg-goldenLight/40 dark:hover:bg-slate-700">Oils</button>
                         <button type="button" data-category="Honey" onclick="filterCategory('Honey')" class="filter-btn px-4 py-2 rounded-xl whitespace-nowrap transition-all active:scale-95 text-darkText dark:text-cream hover:bg-goldenLight/40 dark:hover:bg-slate-700">Honey</button>
                         <button type="button" data-category="Seeds" onclick="filterCategory('Seeds')" class="filter-btn px-4 py-2 rounded-xl whitespace-nowrap transition-all active:scale-95 text-darkText dark:text-cream hover:bg-goldenLight/40 dark:hover:bg-slate-700">Seeds</button>
+                        <button type="button" data-category="Salt" onclick="filterCategory('Salt')" class="filter-btn px-4 py-2 rounded-xl whitespace-nowrap transition-all active:scale-95 text-darkText dark:text-cream hover:bg-goldenLight/40 dark:hover:bg-slate-700">Salt</button>
                     </div>
                     <p class="text-xs font-bold text-deepBrown dark:text-goldenHoney flex items-center gap-1.5 bg-goldenHoney/10 px-3 py-1.5 rounded-full border border-goldenHoney/20">
                         <i class="fa-solid fa-scale-balanced text-goldenHoney"></i> Choose your pack size on every product
@@ -299,13 +301,13 @@
                     <div class="mt-8 bg-cream dark:bg-slate-800 p-6 sm:p-8 rounded-3xl border border-goldenHoney/30 shadow-lg hover:shadow-xl transition-shadow">
                         <h3 class="font-bold text-sm text-deepBrown dark:text-cream mb-6">What is your daily goal?</h3>
                         <div class="grid sm:grid-cols-3 gap-4">
-                            <button onclick="showQuizResult('Energy & Muscle', 'Jumbo Cashews (200g) + Almond Oil (100ml)')" class="p-5 rounded-2xl bg-white dark:bg-slate-700 hover:border-goldenHoney border border-goldenHoney/20 text-xs font-bold text-deepBrown dark:text-goldenLight transition-all hover:-translate-y-1 hover:shadow-md group">
+                            <button onclick="showQuizResult('Energy & Muscle', 'Sweet Raisins (200g) + Almond Oil (100ml)')" class="p-5 rounded-2xl bg-white dark:bg-slate-700 hover:border-goldenHoney border border-goldenHoney/20 text-xs font-bold text-deepBrown dark:text-goldenLight transition-all hover:-translate-y-1 hover:shadow-md group">
                                 <i class="fa-solid fa-bolt text-3xl text-goldenHoney block mb-3 group-hover:scale-125 transition-transform"></i> Energy & Fitness
                             </button>
                             <button onclick="showQuizResult('Immunity & Defense', 'Pure Sidr Honey (200g) + Chia Seeds (100g)')" class="p-5 rounded-2xl bg-white dark:bg-slate-700 hover:border-goldenHoney border border-goldenHoney/20 text-xs font-bold text-deepBrown dark:text-goldenLight transition-all hover:-translate-y-1 hover:shadow-md group">
                                 <i class="fa-solid fa-shield-halved text-3xl text-goldenHoney block mb-3 group-hover:scale-125 transition-transform"></i> Immunity Boost
                             </button>
-                            <button onclick="showQuizResult('Brain Power & Focus', 'Organic Almonds (200g) + Pumpkin Seeds (100g)')" class="p-5 rounded-2xl bg-white dark:bg-slate-700 hover:border-goldenHoney border border-goldenHoney/20 text-xs font-bold text-deepBrown dark:text-goldenLight transition-all hover:-translate-y-1 hover:shadow-md group">
+                            <button onclick="showQuizResult('Brain Power & Focus', 'Dry Dates (200g) + Pumpkin Seeds (100g)')" class="p-5 rounded-2xl bg-white dark:bg-slate-700 hover:border-goldenHoney border border-goldenHoney/20 text-xs font-bold text-deepBrown dark:text-goldenLight transition-all hover:-translate-y-1 hover:shadow-md group">
                                 <i class="fa-solid fa-brain text-3xl text-goldenHoney block mb-3 group-hover:scale-125 transition-transform"></i> Brain & Memory
                             </button>
                         </div>
@@ -499,7 +501,7 @@
         <div id="searchModalBox" class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl relative border border-goldenHoney/30 modal-animated modal-hidden">
             <button onclick="toggleSearchModal()" aria-label="Close search" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 text-xl transition-colors"><i class="fa-solid fa-xmark"></i></button>
             <h3 class="font-bold text-deepBrown dark:text-cream text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-magnifying-glass text-goldenHoney"></i> Search Products</h3>
-            <input type="text" id="searchInput" oninput="handleSearch(this.value)" aria-label="Search products" placeholder="Search almonds, honey, oils, seeds..." class="w-full bg-cream dark:bg-slate-700 border border-goldenHoney/30 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-goldenHoney transition-colors">
+            <input type="text" id="searchInput" oninput="handleSearch(this.value)" aria-label="Search products" placeholder="Search raisins, honey, oils, seeds..." class="w-full bg-cream dark:bg-slate-700 border border-goldenHoney/30 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-goldenHoney transition-colors">
             <div id="searchResults" class="mt-4 max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700 text-xs"></div>
         </div>
     </div>
