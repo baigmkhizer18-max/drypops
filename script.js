@@ -106,7 +106,7 @@ const DB_API = {
             name: 'Chia Seeds', 
             category: 'Seeds', 
             stock: 50, 
-            image: 'images/chia seeds.png', 
+            image: 'images/chia seeds (1).png', 
             desc: 'Nutrient-dense black chia seeds rich in Omega-3 fatty acids and soluble dietary fiber.',
             nutrition: 'Fiber: 34g, Protein: 16.5g, Omega-3: 17.8g (per 100g)',
             benefits: 'Supports weight management, keeps hydration levels high, and regulates digestion.',
@@ -993,26 +993,29 @@ function showToast(msg) {
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.add('hidden'), 3000);
 }
- 
 /* =====================================================================
-   DryPops Chatbot  (chatbot.js)
-   - Rule-based (koi API key / server nahi chahiye)
-   - Products, prices, stock, coupons aur WhatsApp number seedha script.js
-     ke DB_API aur SHOP_CONFIG se leta hai, to wahan change karte hi
-     chatbot khud update ho jata hai.
-   - Cart mein add karna, checkout kholna aur WhatsApp pe order bhejna
-     aapke maujooda functions (addToCart, toggleCart, ...) se hota hai.
-   - index.html mein script.js ke BAAD load karein.
+   DryPops Chatbot (English, AI-powered)
+   - Free-text questions go to /api/chat (Vercel serverless function) which
+     calls Claude. The live catalog from DB_API / SHOP_CONFIG is sent along,
+     so prices, stock, coupons and delivery info are always current.
+   - If /api/chat is unreachable, a built-in rule-based English fallback
+     answers the common questions.
+   - Buttons add items to the cart, open checkout and send the order to
+     WhatsApp using the existing cart functions above.
    ===================================================================== */
 (function () {
     'use strict';
  
     if (typeof DB_API === 'undefined' || typeof SHOP_CONFIG === 'undefined') {
-        console.warn('[DryPops chatbot] script.js pehle load hona chahiye.');
+        console.warn('[DryPops chatbot] DB_API / SHOP_CONFIG not found.');
         return;
     }
  
     /* ---------------- helpers ---------------- */
+    // false = works fully inside this file (no server needed).
+    // true  = free-text questions are answered by AI via /api/chat (needs api/chat.js + API key on Vercel).
+    const USE_AI = false;
+ 
     const WA = SHOP_CONFIG.WHATSAPP_NUMBER;
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const money = n => 'Rs. ' + Number(n).toLocaleString();
@@ -1020,30 +1023,49 @@ function showToast(msg) {
     const products = () => DB_API.products;
     const byId = id => products().find(p => p.id === id);
     const categories = () => [...new Set(products().map(p => p.category))];
+    const cartItems = () => (typeof cart !== 'undefined' ? cart : []);
  
-    // Roman Urdu / English naam -> product id
     const ALIASES = {
-        'df-2': ['raisin', 'raisins', 'kishmish', 'kismis', 'sweet raisins'],
-        'df-3': ['dates', 'date', 'khajoor', 'khajur', 'chuhara', 'dry dates'],
-        'ol-1': ['mustard', 'sarson', 'sarson oil', 'mustard oil'],
-        'ol-2': ['coconut', 'nariyal', 'coconut oil'],
-        'ol-3': ['almond', 'badam', 'roghan badam', 'almond oil'],
-        'ol-4': ['olive', 'zaitoon', 'zaitun', 'olive oil'],
-        'hn-1': ['honey', 'shehad', 'shahad', 'shahed', 'sidr', 'sidr honey'],
-        'sd-1': ['chia', 'chia seeds', 'chia seed'],
-        'sd-2': ['sunflower', 'surajmukhi', 'sunflower seeds'],
-        'sd-3': ['pumpkin', 'kaddu', 'kaddu ke beej', 'pumpkin seeds'],
-        'sd-4': ['melon', 'char maghaz', 'charmaghaz', 'melon seeds'],
-        'sl-1': ['pink salt', 'himalayan', 'gulabi namak', 'pink'],
-        'sl-2': ['black salt', 'kala namak', 'kala', 'black']
+        'df-2': ['raisin', 'raisins', 'kishmish', 'sweet raisins'],
+        'df-3': ['dates', 'date', 'khajoor', 'dry dates'],
+        'ol-1': ['mustard', 'sarson', 'mustard oil'],
+        'ol-2': ['coconut', 'coconut oil'],
+        'ol-3': ['almond', 'badam', 'almond oil'],
+        'ol-4': ['olive', 'olive oil'],
+        'hn-1': ['honey', 'shehad', 'sidr', 'sidr honey'],
+        'sd-1': ['chia', 'chia seeds'],
+        'sd-2': ['sunflower', 'sunflower seeds'],
+        'sd-3': ['pumpkin', 'pumpkin seeds'],
+        'sd-4': ['melon', 'char maghaz', 'melon seeds'],
+        'sl-1': ['pink salt', 'himalayan', 'himalayan salt', 'pink'],
+        'sl-2': ['black salt', 'kala namak', 'black']
     };
     const CAT_WORDS = {
-        'Dry Fruits': ['dry fruit', 'dry fruits', 'dryfruit', 'mewa', 'mewe', 'meva'],
-        'Oils': ['oil', 'oils', 'tel', 'roghan'],
-        'Honey': ['honey', 'shehad', 'shahad'],
-        'Seeds': ['seed', 'seeds', 'beej', 'tukhm'],
-        'Salt': ['salt', 'namak']
+        'Dry Fruits': ['dry fruit', 'dry fruits', 'dryfruit', 'dryfruits'],
+        'Oils': ['oil', 'oils'],
+        'Honey': ['honey'],
+        'Seeds': ['seed', 'seeds'],
+        'Salt': ['salt', 'salts']
     };
+ 
+    /* Live store knowledge sent to the AI with every question */
+    function storeContext() {
+        const fee = SHOP_CONFIG.SHIPPING_FEE, min = SHOP_CONFIG.FREE_SHIPPING_MIN;
+        const lines = products().map(p =>
+            `[${p.id}] ${p.name} | ${p.category} | ` +
+            p.weights.map(w => `${w.label}: Rs. ${w.price}`).join(', ') +
+            ` | stock: ${p.stock} | ${p.desc} | Benefits: ${p.benefits} | Nutrition: ${p.nutrition}`);
+        const coupons = Object.entries(SHOP_CONFIG.COUPONS || {}).map(([k, v]) => `${k} = ${v}% off`).join(', ') || 'none';
+        const pay = Object.values(typeof PAYMENT_LABELS !== 'undefined' ? PAYMENT_LABELS : { COD: 'Cash on Delivery' }).join(', ');
+        return [
+            'Store: DryPops (drypops.pk), online store for dry fruits, oils, honey, seeds and salts. Delivery across Pakistan.',
+            `Delivery: ${fee === 0 ? 'currently free' : `Rs. ${fee} fee, free above Rs. ${min}`}. Delivery time depends on the city and is confirmed on WhatsApp.`,
+            `Payment methods: ${pay}. For JazzCash/Easypaisa, account details are sent on WhatsApp.`,
+            `Coupons: ${coupons}. Applied at checkout.`,
+            'Contact: WhatsApp / phone 03282288801, email drypops@gmail.com.',
+            'Products:', ...lines
+        ].join('\n');
+    }
  
     /* ---------------- styles ---------------- */
     const css = `
@@ -1078,6 +1100,7 @@ function showToast(msg) {
     .dp-form input:focus{border-color:#D4AF37}
     .dp-form button{border:0;background:#556B2F;color:#fff;border-radius:12px;width:42px;cursor:pointer;font-size:15px}
     .dp-form button:hover{background:#435525}
+    .dp-form button:disabled{opacity:.5;cursor:not-allowed}
     .dark #dp-bot-panel{background:#0f172a;color:#FAF6F0;border-color:rgba(212,175,55,.4)}
     .dark .dp-bot{background:#1e293b;border-color:#334155;color:#FAF6F0}
     .dark .dp-m b{color:#F3E5AB}
@@ -1094,19 +1117,19 @@ function showToast(msg) {
     /* ---------------- DOM ---------------- */
     const root = document.createElement('div');
     root.innerHTML = `
-        <button id="dp-bot-btn" aria-label="DryPops assistant kholein" title="Humse poochein">
+        <button id="dp-bot-btn" aria-label="Open DryPops assistant" title="Ask us anything">
             <i class="fa-solid fa-comments"></i><span class="dp-dot"></span>
         </button>
         <div id="dp-bot-panel" role="dialog" aria-label="DryPops assistant">
             <div class="dp-head">
                 <div class="dp-avatar"><i class="fa-solid fa-leaf"></i></div>
-                <div><b>DryPops Assistant</b><small>Aam tor par foran jawab deta hai</small></div>
-                <button class="dp-x" aria-label="Band karein"><i class="fa-solid fa-xmark"></i></button>
+                <div><b>DryPops Assistant</b><small>Ask about products, orders &amp; delivery</small></div>
+                <button class="dp-x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="dp-msgs" id="dp-msgs" aria-live="polite"></div>
             <form class="dp-form" id="dp-form" autocomplete="off">
-                <input id="dp-input" type="text" placeholder="Yahan likhein... (e.g. honey ka rate)" aria-label="Message">
-                <button type="submit" aria-label="Bhejein"><i class="fa-solid fa-paper-plane"></i></button>
+                <input id="dp-input" type="text" maxlength="400" placeholder="Type your question..." aria-label="Message">
+                <button type="submit" id="dp-send" aria-label="Send"><i class="fa-solid fa-paper-plane"></i></button>
             </form>
         </div>`;
     document.body.appendChild(root);
@@ -1116,8 +1139,11 @@ function showToast(msg) {
     const msgs = document.getElementById('dp-msgs');
     const form = document.getElementById('dp-form');
     const input = document.getElementById('dp-input');
+    const sendBtn = document.getElementById('dp-send');
     let greeted = false;
     let lastUserText = '';
+    let busy = false;
+    const history = [];                       // {role, content} for the AI
  
     function scrollDown() { msgs.scrollTop = msgs.scrollHeight; }
     function clearChips() { msgs.querySelectorAll('.dp-chips').forEach(c => c.remove()); }
@@ -1131,41 +1157,48 @@ function showToast(msg) {
         scrollDown();
     }
  
-    // replies: [{label, a:'action'}] ya [{label, href}] (href = WhatsApp link)
-    function botSay(html, replies) {
+    function showTyping() {
         clearChips();
         const typing = document.createElement('div');
         typing.className = 'dp-m dp-bot dp-typing';
         typing.innerHTML = '<i></i><i></i><i></i>';
         msgs.appendChild(typing);
         scrollDown();
-        setTimeout(() => {
-            typing.remove();
-            const d = document.createElement('div');
-            d.className = 'dp-m dp-bot';
-            d.innerHTML = html;
-            msgs.appendChild(d);
-            if (replies && replies.length) {
-                const wrap = document.createElement('div');
-                wrap.className = 'dp-chips';
-                replies.forEach(r => {
-                    if (r.href) {
-                        const a = document.createElement('a');
-                        a.className = 'dp-chip dp-wa';
-                        a.href = r.href; a.target = '_blank'; a.rel = 'noopener';
-                        a.innerHTML = '<i class="fa-brands fa-whatsapp"></i> ' + esc(r.label);
-                        wrap.appendChild(a);
-                    } else {
-                        const b = document.createElement('button');
-                        b.type = 'button'; b.className = 'dp-chip';
-                        b.dataset.a = r.a; b.textContent = r.label;
-                        wrap.appendChild(b);
-                    }
-                });
-                msgs.appendChild(wrap);
-            }
-            scrollDown();
-        }, 450);
+        return () => typing.remove();
+    }
+ 
+    // replies: [{label, a:'action'}] or [{label, href}] (href = WhatsApp link)
+    function appendBot(html, replies) {
+        clearChips();
+        const d = document.createElement('div');
+        d.className = 'dp-m dp-bot';
+        d.innerHTML = html;
+        msgs.appendChild(d);
+        if (replies && replies.length) {
+            const wrap = document.createElement('div');
+            wrap.className = 'dp-chips';
+            replies.forEach(r => {
+                if (r.href) {
+                    const a = document.createElement('a');
+                    a.className = 'dp-chip dp-wa';
+                    a.href = r.href; a.target = '_blank'; a.rel = 'noopener';
+                    a.innerHTML = '<i class="fa-brands fa-whatsapp"></i> ' + esc(r.label);
+                    wrap.appendChild(a);
+                } else {
+                    const b = document.createElement('button');
+                    b.type = 'button'; b.className = 'dp-chip';
+                    b.dataset.a = r.a; b.textContent = r.label;
+                    wrap.appendChild(b);
+                }
+            });
+            msgs.appendChild(wrap);
+        }
+        scrollDown();
+    }
+ 
+    function botSay(html, replies) {
+        const stop = showTyping();
+        setTimeout(() => { stop(); appendBot(html, replies); }, 400);
     }
  
     /* ---------------- reusable reply sets ---------------- */
@@ -1173,49 +1206,55 @@ function showToast(msg) {
         { label: '🛍️ Products', a: 'cats' },
         { label: '🚚 Delivery', a: 'delivery' },
         { label: '💳 Payment', a: 'payment' },
-        { label: '🏷️ Coupon', a: 'coupon' },
-        { label: '🛒 Mera Cart', a: 'cart' }
+        { label: '🏷️ Coupons', a: 'coupon' },
+        { label: '🛒 My Cart', a: 'cart' }
     ];
-    const agentChip = () => ({ label: 'WhatsApp pe baat karein', href: waLink('Hi DryPops! ' + (lastUserText ? 'Mujhe yeh poochna hai: ' + lastUserText : 'Mujhe madad chahiye.')) });
+    const agentChip = () => ({
+        label: 'Chat with us on WhatsApp',
+        href: waLink('Hi DryPops! ' + (lastUserText ? 'I have a question: ' + lastUserText : 'I need some help.'))
+    });
  
-    /* ---------------- answers ---------------- */
+    /* ---------------- structured answers (buttons) ---------------- */
     function showWelcome() {
-        botSay('Assalam o Alaikum! 👋 Main <b>DryPops</b> ka assistant hoon. Main products, rates, delivery aur order mein madad kar sakta hoon. Kya jaanna chahenge?', mainMenu());
+        botSay('Hi there! 👋 I\'m the <b>DryPops</b> assistant. Ask me anything about our products, prices, delivery or how to order, or use the buttons below.', mainMenu());
     }
  
     function showCategories() {
-        botSay('Hamare paas ye categories hain, kaunsi dekhni hai?',
+        botSay('Which category would you like to explore?',
             categories().map(c => ({ label: c, a: 'cat:' + c })).concat([{ label: '⬅ Menu', a: 'menu' }]));
     }
  
     function showCategory(cat) {
         const list = products().filter(p => p.category === cat);
         if (!list.length) return fallback();
-        botSay(`<b>${esc(cat)}</b> mein ye available hain:<br>` +
-            list.map(p => `• ${esc(p.name)} — <span class="dp-price">${money(p.weights[0].price)}</span> se shuru`).join('<br>') +
-            '<br>Kisi ka naam chunein:',
+        botSay(`Here\'s what we have in <b>${esc(cat)}</b>:<br>` +
+            list.map(p => `• ${esc(p.name)}: <span class="dp-price">from ${money(p.weights[0].price)}</span>`).join('<br>') +
+            '<br>Tap a product for details:',
             list.map(p => ({ label: p.name, a: 'prod:' + p.id })).concat([{ label: '⬅ Categories', a: 'cats' }]));
+    }
+ 
+    function productCardHtml(p) {
+        let stockLine = '';
+        if (p.stock <= 0) stockLine = '<br>❌ <b>Currently out of stock.</b>';
+        else if (p.stock <= 10) stockLine = `<br>⚠️ Only <b>${p.stock}</b> left in stock.`;
+        const prices = p.weights.map(w => `• ${esc(w.label)}: <span class="dp-price">${money(w.price)}</span>`).join('<br>');
+        return `<b>${esc(p.name)}</b><br>${esc(p.desc)}<br><br>${prices}${stockLine}<br><br>Choose a size to add it to your cart:`;
     }
  
     function showProduct(id) {
         const p = byId(id);
         if (!p) return fallback();
-        let stockLine = '';
-        if (p.stock <= 0) stockLine = '<br>❌ <b>Abhi stock khatam hai.</b>';
-        else if (p.stock <= 10) stockLine = `<br>⚠️ Sirf <b>${p.stock}</b> pieces bache hain.`;
-        const prices = p.weights.map(w => `• ${esc(w.label)} — <span class="dp-price">${money(w.price)}</span>`).join('<br>');
-        const html = `<b>${esc(p.name)}</b><br>${esc(p.desc)}<br><br>${prices}${stockLine}<br><br>Cart mein daalne ke liye size chunein:`;
         const chips = p.stock > 0 ? p.weights.map(w => ({ label: `${w.label} (${money(w.price)})`, a: `add:${p.id}|${w.label}` })) : [];
-        chips.push({ label: 'Faide / Nutrition', a: 'info:' + p.id });
+        chips.push({ label: 'Benefits & nutrition', a: 'info:' + p.id });
         chips.push({ label: '⬅ ' + p.category, a: 'cat:' + p.category });
-        botSay(html, chips);
+        botSay(productCardHtml(p), chips);
     }
  
     function showInfo(id) {
         const p = byId(id);
         if (!p) return fallback();
-        botSay(`<b>${esc(p.name)}</b><br><b>Faide:</b> ${esc(p.benefits)}<br><b>Nutrition:</b> ${esc(p.nutrition)}`,
-            [{ label: 'Size chunein', a: 'prod:' + p.id }, { label: '⬅ Menu', a: 'menu' }]);
+        botSay(`<b>${esc(p.name)}</b><br><b>Benefits:</b> ${esc(p.benefits)}<br><b>Nutrition:</b> ${esc(p.nutrition)}`,
+            [{ label: 'Choose a size', a: 'prod:' + p.id }, { label: '⬅ Menu', a: 'menu' }]);
     }
  
     function addProduct(id, label) {
@@ -1225,70 +1264,70 @@ function showToast(msg) {
         const ok = typeof addToCart === 'function' &&
             addToCart({ id: p.id, title: `${p.name} (${label})`, price: w.price, weightLabel: label });
         if (ok) {
-            botSay(`✅ <b>${esc(p.name)} (${esc(label)})</b> cart mein add ho gaya. Aur kuch lena hai ya order confirm karein?`, [
-                { label: 'Aur products', a: 'cats' },
-                { label: '🛒 Cart dekhein', a: 'cart' },
-                { label: 'Checkout karein', a: 'checkout' },
-                { label: 'WhatsApp pe order bhejein', a: 'wa-order' }
+            botSay(`✅ <b>${esc(p.name)} (${esc(label)})</b> was added to your cart. Would you like anything else, or shall we place the order?`, [
+                { label: 'Browse more', a: 'cats' },
+                { label: '🛒 View cart', a: 'cart' },
+                { label: 'Checkout', a: 'checkout' },
+                { label: 'Order via WhatsApp', a: 'wa-order' }
             ]);
         } else {
-            botSay('Maaf kijiye, ye item abhi cart mein add nahi ho saka (stock kam ho sakta hai). Koi aur size ya product try karein.',
+            botSay('Sorry, I couldn\'t add that item (stock may be low). Please try another size or product.',
                 [{ label: 'Products', a: 'cats' }, agentChip()]);
         }
     }
  
     function showCart() {
-        const c = (typeof cart !== 'undefined') ? cart : [];
+        const c = cartItems();
         if (!c.length) {
-            botSay('Aapka cart abhi khali hai. 🛒 Products dekhna chahenge?', [{ label: '🛍️ Products', a: 'cats' }]);
+            botSay('Your cart is empty right now. 🛒 Want to browse our products?', [{ label: '🛍️ Products', a: 'cats' }]);
             return;
         }
         const t = typeof calcTotals === 'function' ? calcTotals() : null;
         const lines = c.map(i => `• ${esc(i.title)} × ${i.quantity} = ${money(i.price * i.quantity)}`).join('<br>');
-        botSay(`<b>Aapka cart:</b><br>${lines}` + (t ? `<br><br><b>Total: ${money(t.total)}</b>${t.shipping === 0 ? ' (delivery free)' : ''}` : ''),
-            [{ label: 'Checkout karein', a: 'checkout' }, { label: 'WhatsApp pe order bhejein', a: 'wa-order' }, { label: 'Aur products', a: 'cats' }]);
+        botSay(`<b>Your cart:</b><br>${lines}` + (t ? `<br><br><b>Total: ${money(t.total)}</b>${t.shipping === 0 ? ' (free delivery)' : ''}` : ''),
+            [{ label: 'Checkout', a: 'checkout' }, { label: 'Order via WhatsApp', a: 'wa-order' }, { label: 'Browse more', a: 'cats' }]);
     }
  
     function showDelivery() {
         const fee = SHOP_CONFIG.SHIPPING_FEE, min = SHOP_CONFIG.FREE_SHIPPING_MIN;
         const feeLine = fee === 0
-            ? 'Filhal delivery <b>free</b> hai.'
-            : `${money(min)} se upar ke orders par delivery <b>free</b>, us se kam par ${money(fee)} charges.`;
-        botSay(`🚚 Hum <b>poore Pakistan</b> mein deliver karte hain. ${feeLine}<br>Delivery ka waqt aapke shehar par depend karta hai, order ke baad WhatsApp par confirm kar diya jata hai.`,
-            [{ label: 'Payment ke tareeqe', a: 'payment' }, { label: '⬅ Menu', a: 'menu' }]);
+            ? 'Delivery is currently <b>free</b>.'
+            : `Delivery is <b>free</b> on orders above ${money(min)}; otherwise a ${money(fee)} fee applies.`;
+        botSay(`🚚 We deliver <b>all across Pakistan</b>. ${feeLine}<br>Delivery time depends on your city, and we confirm it with you on WhatsApp after you order.`,
+            [{ label: 'Payment methods', a: 'payment' }, { label: '⬅ Menu', a: 'menu' }]);
     }
  
     function showPayment() {
         const labels = Object.values(typeof PAYMENT_LABELS !== 'undefined' ? PAYMENT_LABELS : { COD: 'Cash on Delivery', WALLET: 'JazzCash / Easypaisa' });
-        botSay('💳 Payment ke tareeqe:<br>' + labels.map(l => '• ' + esc(l)).join('<br>') +
-            '<br><br>JazzCash / Easypaisa chunne par hum WhatsApp par account details bhej dete hain, aur payment milne par order confirm hota hai.',
+        botSay('💳 You can pay with:<br>' + labels.map(l => '• ' + esc(l)).join('<br>') +
+            '<br><br>If you choose JazzCash / Easypaisa, we send the account details on WhatsApp and confirm your order once the payment is received.',
             [{ label: 'Delivery', a: 'delivery' }, { label: '⬅ Menu', a: 'menu' }]);
     }
  
     function showCoupon() {
         const codes = Object.entries(SHOP_CONFIG.COUPONS || {});
         if (!codes.length) {
-            botSay('Abhi koi coupon active nahi hai. Naye offers ke liye WhatsApp par rabta karein.', [agentChip(), { label: '⬅ Menu', a: 'menu' }]);
+            botSay('There are no active coupons at the moment. Message us on WhatsApp to hear about new offers.', [agentChip(), { label: '⬅ Menu', a: 'menu' }]);
             return;
         }
-        botSay('🏷️ Coupon code: ' + codes.map(([k, v]) => `<b>${esc(k)}</b> (${v}% off)`).join(', ') +
-            '<br>Checkout page par "coupon code" wali jagah par laga dein.',
-            [{ label: 'Checkout karein', a: 'checkout' }, { label: '⬅ Menu', a: 'menu' }]);
+        botSay('🏷️ Coupon codes: ' + codes.map(([k, v]) => `<b>${esc(k)}</b> (${v}% off)`).join(', ') +
+            '<br>Enter the code in the coupon field at checkout.',
+            [{ label: 'Checkout', a: 'checkout' }, { label: '⬅ Menu', a: 'menu' }]);
     }
  
     function showContact() {
-        botSay(`📞 Phone: <b>03282288801</b><br>📧 Email: drypops@gmail.com<br>Sab se tez jawab WhatsApp par milta hai:`,
+        botSay('📞 Phone: <b>03282288801</b><br>📧 Email: drypops@gmail.com<br>The fastest way to reach us is WhatsApp:',
             [agentChip(), { label: '⬅ Menu', a: 'menu' }]);
     }
  
     function fallback() {
-        botSay('Mujhe ye theek se samajh nahi aaya 🙏 Neeche se option chunein, ya seedha hamari team se WhatsApp par baat kar lein.',
+        botSay('I\'m not sure I understood that 🙏 Please pick an option below, or chat with our team directly on WhatsApp.',
             mainMenu().concat([agentChip()]));
     }
  
-    /* ---------------- actions (chip clicks) ---------------- */
+    /* ---------------- button actions ---------------- */
     function doAction(a) {
-        if (a === 'menu') return botSay('Zaroor! Kis cheez mein madad chahiye?', mainMenu());
+        if (a === 'menu') return botSay('Sure! What can I help you with?', mainMenu());
         if (a === 'cats') return showCategories();
         if (a === 'delivery') return showDelivery();
         if (a === 'payment') return showPayment();
@@ -1296,16 +1335,14 @@ function showToast(msg) {
         if (a === 'contact') return showContact();
         if (a === 'cart') return showCart();
         if (a === 'checkout') {
-            const c = typeof cart !== 'undefined' ? cart : [];
-            if (!c.length) return botSay('Cart khali hai, pehle koi product add karein.', [{ label: '🛍️ Products', a: 'cats' }]);
+            if (!cartItems().length) return botSay('Your cart is empty. Please add a product first.', [{ label: '🛍️ Products', a: 'cats' }]);
             if (typeof proceedToCheckout === 'function') proceedToCheckout();
-            return botSay('Checkout page khol diya hai. Wahan apni details bhar dein. 👍', [{ label: '⬅ Menu', a: 'menu' }]);
+            return botSay('I\'ve opened the checkout for you. Fill in your details there. 👍', [{ label: '⬅ Menu', a: 'menu' }]);
         }
         if (a === 'wa-order') {
-            const c = typeof cart !== 'undefined' ? cart : [];
-            if (!c.length) return botSay('Cart khali hai, pehle koi product add karein.', [{ label: '🛍️ Products', a: 'cats' }]);
+            if (!cartItems().length) return botSay('Your cart is empty. Please add a product first.', [{ label: '🛍️ Products', a: 'cats' }]);
             if (typeof checkoutViaWhatsApp === 'function') checkoutViaWhatsApp();
-            return botSay('WhatsApp khul gaya hai, wahan order ka message ready hai, bas <b>Send</b> dabayein. ✅', [{ label: '⬅ Menu', a: 'menu' }]);
+            return botSay('WhatsApp is opening with your order message ready. Just press <b>Send</b>. ✅', [{ label: '⬅ Menu', a: 'menu' }]);
         }
         if (a.startsWith('cat:')) return showCategory(a.slice(4));
         if (a.startsWith('prod:')) return showProduct(a.slice(5));
@@ -1313,17 +1350,15 @@ function showToast(msg) {
         if (a.startsWith('add:')) { const [id, label] = a.slice(4).split('|'); return addProduct(id, label); }
     }
  
-    /* ---------------- free-text understanding ---------------- */
-    const norm = s => ' ' + s.toLowerCase().replace(/[^a-z0-9\u0600-\u06ff\s]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
-    const hasAny = (t, words) => words.some(w => t.includes(' ' + w + ' ') || (w.length > 4 && t.includes(w)));
+    /* ---------------- offline keyword fallback (English) ---------------- */
+    const norm = s => ' ' + s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+    const hasAny = (t, words) => words.some(w => t.includes(' ' + w + ' '));
  
     function findProduct(t) {
         let best = null, bestLen = 0;
         Object.entries(ALIASES).forEach(([id, names]) => {
             if (!byId(id)) return;
-            names.forEach(n => {
-                if (t.includes(' ' + n + ' ') && n.length > bestLen) { best = id; bestLen = n.length; }
-            });
+            names.forEach(n => { if (t.includes(' ' + n + ' ') && n.length > bestLen) { best = id; bestLen = n.length; } });
         });
         if (best) return best;
         const p = products().find(x => t.includes(' ' + x.name.toLowerCase() + ' '));
@@ -1337,40 +1372,80 @@ function showToast(msg) {
         return null;
     }
  
-    function route(raw) {
+    function localRoute(raw) {
         const t = norm(raw);
-        lastUserText = raw;
- 
-        if (hasAny(t, ['salam', 'assalam', 'aoa', 'hello', 'hi', 'hey', 'slam'])) return showWelcome();
-        if (hasAny(t, ['shukriya', 'shukria', 'thanks', 'thank you', 'thx', 'jazakallah']))
-            return botSay('Aapka shukriya! 😊 Aur kuch poochna ho to bataiye.', mainMenu());
-        if (hasAny(t, ['agent', 'insan', 'banda', 'human', 'call', 'number', 'contact', 'rabta', 'whatsapp', 'baat']))
-            return showContact();
-        if (hasAny(t, ['delivery', 'deliver', 'shipping', 'courier', 'kitne din', 'kab tak', 'charges']))
-            return showDelivery();
-        if (hasAny(t, ['payment', 'cod', 'jazzcash', 'easypaisa', 'cash on delivery', 'paisay', 'paise', 'pay']))
-            return showPayment();
-        if (hasAny(t, ['coupon', 'discount', 'offer', 'promo', 'code', 'sasta', 'off']))
-            return showCoupon();
-        if (hasAny(t, ['cart', 'basket']) ) return showCart();
-        if (hasAny(t, ['checkout', 'confirm']) || (hasAny(t, ['order']) && hasAny(t, ['karna', 'karni', 'karein', 'karo', 'place', 'dena', 'chahiye', 'chahta', 'chahti']))) {
-            const pid = findProduct(t);
-            if (pid) return showProduct(pid);
-            return doAction('checkout');
-        }
- 
+        if (hasAny(t, ['hi', 'hello', 'hey', 'salam', 'assalam'])) return showWelcome();
+        if (hasAny(t, ['thanks', 'thank', 'thx'])) return botSay('You\'re welcome! 😊 Anything else I can help with?', mainMenu());
+        if (hasAny(t, ['agent', 'human', 'call', 'phone', 'contact', 'whatsapp', 'support', 'number'])) return showContact();
+        if (hasAny(t, ['delivery', 'deliver', 'shipping', 'courier', 'ship'])) return showDelivery();
+        if (hasAny(t, ['payment', 'pay', 'cod', 'jazzcash', 'easypaisa', 'cash'])) return showPayment();
+        if (hasAny(t, ['coupon', 'discount', 'promo', 'code', 'offer', 'offers'])) return showCoupon();
+        if (hasAny(t, ['cart', 'basket'])) return showCart();
+        if (hasAny(t, ['checkout'])) return doAction('checkout');
         const pid = findProduct(t);
-        if (pid) {
-            if (hasAny(t, ['faida', 'faide', 'benefit', 'benefits', 'nutrition', 'kyun', 'fayda'])) return showInfo(pid);
-            return showProduct(pid);
-        }
+        if (pid) return hasAny(t, ['benefit', 'benefits', 'nutrition', 'healthy']) ? showInfo(pid) : showProduct(pid);
         const cat = findCategory(t);
         if (cat) return showCategory(cat);
- 
-        if (hasAny(t, ['product', 'products', 'menu', 'list', 'catalog', 'kya kya', 'kia kia', 'items', 'price', 'rate', 'qeemat', 'kimat', 'kitne', 'kitna', 'kya hai', 'sale', 'khareed', 'buy', 'order', 'lena']))
-            return showCategories();
- 
+        if (hasAny(t, ['products', 'product', 'menu', 'catalog', 'price', 'prices', 'buy', 'order', 'sell'])) return showCategories();
         fallback();
+    }
+ 
+    /* ---------------- AI answers ---------------- */
+    function formatAi(text) {
+        return esc(text)
+            .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+            .replace(/^\s*[-*]\s+/gm, '• ')
+            .replace(/\n/g, '<br>');
+    }
+ 
+    async function askAI(userText) {
+        history.push({ role: 'user', content: userText });
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 25000);
+        try {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: history.slice(-10), context: storeContext() }),
+                signal: ctrl.signal
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            let reply = String(data.reply || '').trim();
+            if (!reply) throw new Error('Empty reply');
+ 
+            // optional last line:  PRODUCTS: id1,id2
+            const m = reply.match(/\n?\s*PRODUCTS:\s*([\w\-, ]+)\s*$/i);
+            let ids = [];
+            if (m) {
+                reply = reply.slice(0, m.index).trim();
+                ids = m[1].split(',').map(s => s.trim()).filter(id => byId(id)).slice(0, 3);
+            }
+            history.push({ role: 'assistant', content: reply });
+            const chips = ids.map(id => ({ label: byId(id).name, a: 'prod:' + id }));
+            chips.push({ label: '⬅ Menu', a: 'menu' });
+            return { html: formatAi(reply), chips };
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+ 
+    async function handleText(text) {
+        lastUserText = text;
+        if (!USE_AI) return localRoute(text);
+        busy = true; sendBtn.disabled = true;
+        const stop = showTyping();
+        try {
+            const out = await askAI(text);
+            stop();
+            appendBot(out.html, out.chips.concat([agentChip()]));
+        } catch (err) {
+            history.pop();                     // drop the unanswered question
+            stop();
+            localRoute(text);                  // built-in answers if the AI is unreachable
+        } finally {
+            busy = false; sendBtn.disabled = false;
+        }
     }
  
     /* ---------------- events ---------------- */
@@ -1391,7 +1466,7 @@ function showToast(msg) {
  
     msgs.addEventListener('click', e => {
         const chip = e.target.closest('.dp-chip[data-a]');
-        if (!chip) return;
+        if (!chip || busy) return;
         userSay(chip.textContent);
         doAction(chip.dataset.a);
     });
@@ -1399,10 +1474,10 @@ function showToast(msg) {
     form.addEventListener('submit', e => {
         e.preventDefault();
         const text = input.value.trim();
-        if (!text) return;
+        if (!text || busy) return;
         input.value = '';
         userSay(text);
-        route(text);
+        handleText(text);
     });
 })();
  
