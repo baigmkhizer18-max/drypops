@@ -993,3 +993,416 @@ function showToast(msg) {
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.add('hidden'), 3000);
 }
+ 
+/* =====================================================================
+   DryPops Chatbot  (chatbot.js)
+   - Rule-based (koi API key / server nahi chahiye)
+   - Products, prices, stock, coupons aur WhatsApp number seedha script.js
+     ke DB_API aur SHOP_CONFIG se leta hai, to wahan change karte hi
+     chatbot khud update ho jata hai.
+   - Cart mein add karna, checkout kholna aur WhatsApp pe order bhejna
+     aapke maujooda functions (addToCart, toggleCart, ...) se hota hai.
+   - index.html mein script.js ke BAAD load karein.
+   ===================================================================== */
+(function () {
+    'use strict';
+ 
+    if (typeof DB_API === 'undefined' || typeof SHOP_CONFIG === 'undefined') {
+        console.warn('[DryPops chatbot] script.js pehle load hona chahiye.');
+        return;
+    }
+ 
+    /* ---------------- helpers ---------------- */
+    const WA = SHOP_CONFIG.WHATSAPP_NUMBER;
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const money = n => 'Rs. ' + Number(n).toLocaleString();
+    const waLink = text => `https://wa.me/${WA}?text=${encodeURIComponent(text)}`;
+    const products = () => DB_API.products;
+    const byId = id => products().find(p => p.id === id);
+    const categories = () => [...new Set(products().map(p => p.category))];
+ 
+    // Roman Urdu / English naam -> product id
+    const ALIASES = {
+        'df-2': ['raisin', 'raisins', 'kishmish', 'kismis', 'sweet raisins'],
+        'df-3': ['dates', 'date', 'khajoor', 'khajur', 'chuhara', 'dry dates'],
+        'ol-1': ['mustard', 'sarson', 'sarson oil', 'mustard oil'],
+        'ol-2': ['coconut', 'nariyal', 'coconut oil'],
+        'ol-3': ['almond', 'badam', 'roghan badam', 'almond oil'],
+        'ol-4': ['olive', 'zaitoon', 'zaitun', 'olive oil'],
+        'hn-1': ['honey', 'shehad', 'shahad', 'shahed', 'sidr', 'sidr honey'],
+        'sd-1': ['chia', 'chia seeds', 'chia seed'],
+        'sd-2': ['sunflower', 'surajmukhi', 'sunflower seeds'],
+        'sd-3': ['pumpkin', 'kaddu', 'kaddu ke beej', 'pumpkin seeds'],
+        'sd-4': ['melon', 'char maghaz', 'charmaghaz', 'melon seeds'],
+        'sl-1': ['pink salt', 'himalayan', 'gulabi namak', 'pink'],
+        'sl-2': ['black salt', 'kala namak', 'kala', 'black']
+    };
+    const CAT_WORDS = {
+        'Dry Fruits': ['dry fruit', 'dry fruits', 'dryfruit', 'mewa', 'mewe', 'meva'],
+        'Oils': ['oil', 'oils', 'tel', 'roghan'],
+        'Honey': ['honey', 'shehad', 'shahad'],
+        'Seeds': ['seed', 'seeds', 'beej', 'tukhm'],
+        'Salt': ['salt', 'namak']
+    };
+ 
+    /* ---------------- styles ---------------- */
+    const css = `
+    #dp-bot-btn{position:fixed;left:20px;bottom:24px;z-index:45;width:58px;height:58px;border-radius:50%;border:2px solid #D4AF37;background:#2C1810;color:#D4AF37;font-size:24px;cursor:pointer;box-shadow:0 10px 25px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;transition:transform .25s}
+    #dp-bot-btn:hover{transform:scale(1.08)}
+    #dp-bot-btn .dp-dot{position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:#ef4444;border:2px solid #fff}
+    #dp-bot-panel{position:fixed;left:20px;bottom:96px;z-index:45;width:370px;max-width:calc(100vw - 24px);height:560px;max-height:calc(100vh - 120px);background:#FBF9F5;color:#2B1E16;border-radius:20px;border:1px solid rgba(212,175,55,.5);box-shadow:0 25px 50px -12px rgba(0,0,0,.45);display:none;flex-direction:column;overflow:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+    #dp-bot-panel.dp-open{display:flex;animation:dpPop .25s ease-out}
+    @keyframes dpPop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+    .dp-head{background:#2C1810;color:#FAF6F0;padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:2px solid #D4AF37}
+    .dp-avatar{width:38px;height:38px;border-radius:12px;background:#D4AF37;color:#2C1810;display:flex;align-items:center;justify-content:center;font-size:18px}
+    .dp-head b{display:block;font-size:14px;color:#D4AF37;letter-spacing:.5px}
+    .dp-head small{font-size:11px;opacity:.8}
+    .dp-head .dp-x{margin-left:auto;background:none;border:0;color:#D4AF37;font-size:18px;cursor:pointer}
+    .dp-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth}
+    .dp-m{max-width:88%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.5;word-wrap:break-word}
+    .dp-bot{background:#fff;border:1px solid #eadfc8;border-bottom-left-radius:4px;align-self:flex-start}
+    .dp-user{background:#556B2F;color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+    .dp-m b{color:#2C1810}.dp-user b{color:#fff}
+    .dp-price{color:#9a7b0a;font-weight:700}
+    .dp-chips{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;max-width:96%}
+    .dp-chip{border:1px solid #D4AF37;background:#fff;color:#2C1810;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
+    .dp-chip:hover{background:#D4AF37}
+    .dp-chip.dp-wa{background:#059669;border-color:#059669;color:#fff}
+    .dp-chip.dp-wa:hover{background:#047857}
+    .dp-typing{display:flex;gap:4px;padding:12px}
+    .dp-typing i{width:7px;height:7px;border-radius:50%;background:#b89a3a;animation:dpBlink 1s infinite}
+    .dp-typing i:nth-child(2){animation-delay:.2s}.dp-typing i:nth-child(3){animation-delay:.4s}
+    @keyframes dpBlink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+    .dp-form{display:flex;gap:8px;padding:10px;border-top:1px solid #eadfc8;background:#fff}
+    .dp-form input{flex:1;border:1px solid #eadfc8;background:#FAF6F0;border-radius:12px;padding:10px 12px;font-size:13px;outline:none;color:#2B1E16}
+    .dp-form input:focus{border-color:#D4AF37}
+    .dp-form button{border:0;background:#556B2F;color:#fff;border-radius:12px;width:42px;cursor:pointer;font-size:15px}
+    .dp-form button:hover{background:#435525}
+    .dark #dp-bot-panel{background:#0f172a;color:#FAF6F0;border-color:rgba(212,175,55,.4)}
+    .dark .dp-bot{background:#1e293b;border-color:#334155;color:#FAF6F0}
+    .dark .dp-m b{color:#F3E5AB}
+    .dark .dp-chip{background:#1e293b;color:#FAF6F0}
+    .dark .dp-chip:hover{background:#D4AF37;color:#2C1810}
+    .dark .dp-form{background:#1e293b;border-color:#334155}
+    .dark .dp-form input{background:#0f172a;border-color:#334155;color:#FAF6F0}
+    @media(max-width:480px){#dp-bot-panel{left:12px;right:12px;width:auto;bottom:90px}#dp-bot-btn{left:12px}}
+    `;
+    const styleEl = document.createElement('style');
+    styleEl.textContent = css;
+    document.head.appendChild(styleEl);
+ 
+    /* ---------------- DOM ---------------- */
+    const root = document.createElement('div');
+    root.innerHTML = `
+        <button id="dp-bot-btn" aria-label="DryPops assistant kholein" title="Humse poochein">
+            <i class="fa-solid fa-comments"></i><span class="dp-dot"></span>
+        </button>
+        <div id="dp-bot-panel" role="dialog" aria-label="DryPops assistant">
+            <div class="dp-head">
+                <div class="dp-avatar"><i class="fa-solid fa-leaf"></i></div>
+                <div><b>DryPops Assistant</b><small>Aam tor par foran jawab deta hai</small></div>
+                <button class="dp-x" aria-label="Band karein"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="dp-msgs" id="dp-msgs" aria-live="polite"></div>
+            <form class="dp-form" id="dp-form" autocomplete="off">
+                <input id="dp-input" type="text" placeholder="Yahan likhein... (e.g. honey ka rate)" aria-label="Message">
+                <button type="submit" aria-label="Bhejein"><i class="fa-solid fa-paper-plane"></i></button>
+            </form>
+        </div>`;
+    document.body.appendChild(root);
+ 
+    const btn = document.getElementById('dp-bot-btn');
+    const panel = document.getElementById('dp-bot-panel');
+    const msgs = document.getElementById('dp-msgs');
+    const form = document.getElementById('dp-form');
+    const input = document.getElementById('dp-input');
+    let greeted = false;
+    let lastUserText = '';
+ 
+    function scrollDown() { msgs.scrollTop = msgs.scrollHeight; }
+    function clearChips() { msgs.querySelectorAll('.dp-chips').forEach(c => c.remove()); }
+ 
+    function userSay(text) {
+        clearChips();
+        const d = document.createElement('div');
+        d.className = 'dp-m dp-user';
+        d.textContent = text;
+        msgs.appendChild(d);
+        scrollDown();
+    }
+ 
+    // replies: [{label, a:'action'}] ya [{label, href}] (href = WhatsApp link)
+    function botSay(html, replies) {
+        clearChips();
+        const typing = document.createElement('div');
+        typing.className = 'dp-m dp-bot dp-typing';
+        typing.innerHTML = '<i></i><i></i><i></i>';
+        msgs.appendChild(typing);
+        scrollDown();
+        setTimeout(() => {
+            typing.remove();
+            const d = document.createElement('div');
+            d.className = 'dp-m dp-bot';
+            d.innerHTML = html;
+            msgs.appendChild(d);
+            if (replies && replies.length) {
+                const wrap = document.createElement('div');
+                wrap.className = 'dp-chips';
+                replies.forEach(r => {
+                    if (r.href) {
+                        const a = document.createElement('a');
+                        a.className = 'dp-chip dp-wa';
+                        a.href = r.href; a.target = '_blank'; a.rel = 'noopener';
+                        a.innerHTML = '<i class="fa-brands fa-whatsapp"></i> ' + esc(r.label);
+                        wrap.appendChild(a);
+                    } else {
+                        const b = document.createElement('button');
+                        b.type = 'button'; b.className = 'dp-chip';
+                        b.dataset.a = r.a; b.textContent = r.label;
+                        wrap.appendChild(b);
+                    }
+                });
+                msgs.appendChild(wrap);
+            }
+            scrollDown();
+        }, 450);
+    }
+ 
+    /* ---------------- reusable reply sets ---------------- */
+    const mainMenu = () => [
+        { label: '🛍️ Products', a: 'cats' },
+        { label: '🚚 Delivery', a: 'delivery' },
+        { label: '💳 Payment', a: 'payment' },
+        { label: '🏷️ Coupon', a: 'coupon' },
+        { label: '🛒 Mera Cart', a: 'cart' }
+    ];
+    const agentChip = () => ({ label: 'WhatsApp pe baat karein', href: waLink('Hi DryPops! ' + (lastUserText ? 'Mujhe yeh poochna hai: ' + lastUserText : 'Mujhe madad chahiye.')) });
+ 
+    /* ---------------- answers ---------------- */
+    function showWelcome() {
+        botSay('Assalam o Alaikum! 👋 Main <b>DryPops</b> ka assistant hoon. Main products, rates, delivery aur order mein madad kar sakta hoon. Kya jaanna chahenge?', mainMenu());
+    }
+ 
+    function showCategories() {
+        botSay('Hamare paas ye categories hain, kaunsi dekhni hai?',
+            categories().map(c => ({ label: c, a: 'cat:' + c })).concat([{ label: '⬅ Menu', a: 'menu' }]));
+    }
+ 
+    function showCategory(cat) {
+        const list = products().filter(p => p.category === cat);
+        if (!list.length) return fallback();
+        botSay(`<b>${esc(cat)}</b> mein ye available hain:<br>` +
+            list.map(p => `• ${esc(p.name)} — <span class="dp-price">${money(p.weights[0].price)}</span> se shuru`).join('<br>') +
+            '<br>Kisi ka naam chunein:',
+            list.map(p => ({ label: p.name, a: 'prod:' + p.id })).concat([{ label: '⬅ Categories', a: 'cats' }]));
+    }
+ 
+    function showProduct(id) {
+        const p = byId(id);
+        if (!p) return fallback();
+        let stockLine = '';
+        if (p.stock <= 0) stockLine = '<br>❌ <b>Abhi stock khatam hai.</b>';
+        else if (p.stock <= 10) stockLine = `<br>⚠️ Sirf <b>${p.stock}</b> pieces bache hain.`;
+        const prices = p.weights.map(w => `• ${esc(w.label)} — <span class="dp-price">${money(w.price)}</span>`).join('<br>');
+        const html = `<b>${esc(p.name)}</b><br>${esc(p.desc)}<br><br>${prices}${stockLine}<br><br>Cart mein daalne ke liye size chunein:`;
+        const chips = p.stock > 0 ? p.weights.map(w => ({ label: `${w.label} (${money(w.price)})`, a: `add:${p.id}|${w.label}` })) : [];
+        chips.push({ label: 'Faide / Nutrition', a: 'info:' + p.id });
+        chips.push({ label: '⬅ ' + p.category, a: 'cat:' + p.category });
+        botSay(html, chips);
+    }
+ 
+    function showInfo(id) {
+        const p = byId(id);
+        if (!p) return fallback();
+        botSay(`<b>${esc(p.name)}</b><br><b>Faide:</b> ${esc(p.benefits)}<br><b>Nutrition:</b> ${esc(p.nutrition)}`,
+            [{ label: 'Size chunein', a: 'prod:' + p.id }, { label: '⬅ Menu', a: 'menu' }]);
+    }
+ 
+    function addProduct(id, label) {
+        const p = byId(id);
+        const w = p && p.weights.find(x => x.label === label);
+        if (!w) return fallback();
+        const ok = typeof addToCart === 'function' &&
+            addToCart({ id: p.id, title: `${p.name} (${label})`, price: w.price, weightLabel: label });
+        if (ok) {
+            botSay(`✅ <b>${esc(p.name)} (${esc(label)})</b> cart mein add ho gaya. Aur kuch lena hai ya order confirm karein?`, [
+                { label: 'Aur products', a: 'cats' },
+                { label: '🛒 Cart dekhein', a: 'cart' },
+                { label: 'Checkout karein', a: 'checkout' },
+                { label: 'WhatsApp pe order bhejein', a: 'wa-order' }
+            ]);
+        } else {
+            botSay('Maaf kijiye, ye item abhi cart mein add nahi ho saka (stock kam ho sakta hai). Koi aur size ya product try karein.',
+                [{ label: 'Products', a: 'cats' }, agentChip()]);
+        }
+    }
+ 
+    function showCart() {
+        const c = (typeof cart !== 'undefined') ? cart : [];
+        if (!c.length) {
+            botSay('Aapka cart abhi khali hai. 🛒 Products dekhna chahenge?', [{ label: '🛍️ Products', a: 'cats' }]);
+            return;
+        }
+        const t = typeof calcTotals === 'function' ? calcTotals() : null;
+        const lines = c.map(i => `• ${esc(i.title)} × ${i.quantity} = ${money(i.price * i.quantity)}`).join('<br>');
+        botSay(`<b>Aapka cart:</b><br>${lines}` + (t ? `<br><br><b>Total: ${money(t.total)}</b>${t.shipping === 0 ? ' (delivery free)' : ''}` : ''),
+            [{ label: 'Checkout karein', a: 'checkout' }, { label: 'WhatsApp pe order bhejein', a: 'wa-order' }, { label: 'Aur products', a: 'cats' }]);
+    }
+ 
+    function showDelivery() {
+        const fee = SHOP_CONFIG.SHIPPING_FEE, min = SHOP_CONFIG.FREE_SHIPPING_MIN;
+        const feeLine = fee === 0
+            ? 'Filhal delivery <b>free</b> hai.'
+            : `${money(min)} se upar ke orders par delivery <b>free</b>, us se kam par ${money(fee)} charges.`;
+        botSay(`🚚 Hum <b>poore Pakistan</b> mein deliver karte hain. ${feeLine}<br>Delivery ka waqt aapke shehar par depend karta hai, order ke baad WhatsApp par confirm kar diya jata hai.`,
+            [{ label: 'Payment ke tareeqe', a: 'payment' }, { label: '⬅ Menu', a: 'menu' }]);
+    }
+ 
+    function showPayment() {
+        const labels = Object.values(typeof PAYMENT_LABELS !== 'undefined' ? PAYMENT_LABELS : { COD: 'Cash on Delivery', WALLET: 'JazzCash / Easypaisa' });
+        botSay('💳 Payment ke tareeqe:<br>' + labels.map(l => '• ' + esc(l)).join('<br>') +
+            '<br><br>JazzCash / Easypaisa chunne par hum WhatsApp par account details bhej dete hain, aur payment milne par order confirm hota hai.',
+            [{ label: 'Delivery', a: 'delivery' }, { label: '⬅ Menu', a: 'menu' }]);
+    }
+ 
+    function showCoupon() {
+        const codes = Object.entries(SHOP_CONFIG.COUPONS || {});
+        if (!codes.length) {
+            botSay('Abhi koi coupon active nahi hai. Naye offers ke liye WhatsApp par rabta karein.', [agentChip(), { label: '⬅ Menu', a: 'menu' }]);
+            return;
+        }
+        botSay('🏷️ Coupon code: ' + codes.map(([k, v]) => `<b>${esc(k)}</b> (${v}% off)`).join(', ') +
+            '<br>Checkout page par "coupon code" wali jagah par laga dein.',
+            [{ label: 'Checkout karein', a: 'checkout' }, { label: '⬅ Menu', a: 'menu' }]);
+    }
+ 
+    function showContact() {
+        botSay(`📞 Phone: <b>03282288801</b><br>📧 Email: drypops@gmail.com<br>Sab se tez jawab WhatsApp par milta hai:`,
+            [agentChip(), { label: '⬅ Menu', a: 'menu' }]);
+    }
+ 
+    function fallback() {
+        botSay('Mujhe ye theek se samajh nahi aaya 🙏 Neeche se option chunein, ya seedha hamari team se WhatsApp par baat kar lein.',
+            mainMenu().concat([agentChip()]));
+    }
+ 
+    /* ---------------- actions (chip clicks) ---------------- */
+    function doAction(a) {
+        if (a === 'menu') return botSay('Zaroor! Kis cheez mein madad chahiye?', mainMenu());
+        if (a === 'cats') return showCategories();
+        if (a === 'delivery') return showDelivery();
+        if (a === 'payment') return showPayment();
+        if (a === 'coupon') return showCoupon();
+        if (a === 'contact') return showContact();
+        if (a === 'cart') return showCart();
+        if (a === 'checkout') {
+            const c = typeof cart !== 'undefined' ? cart : [];
+            if (!c.length) return botSay('Cart khali hai, pehle koi product add karein.', [{ label: '🛍️ Products', a: 'cats' }]);
+            if (typeof proceedToCheckout === 'function') proceedToCheckout();
+            return botSay('Checkout page khol diya hai. Wahan apni details bhar dein. 👍', [{ label: '⬅ Menu', a: 'menu' }]);
+        }
+        if (a === 'wa-order') {
+            const c = typeof cart !== 'undefined' ? cart : [];
+            if (!c.length) return botSay('Cart khali hai, pehle koi product add karein.', [{ label: '🛍️ Products', a: 'cats' }]);
+            if (typeof checkoutViaWhatsApp === 'function') checkoutViaWhatsApp();
+            return botSay('WhatsApp khul gaya hai, wahan order ka message ready hai, bas <b>Send</b> dabayein. ✅', [{ label: '⬅ Menu', a: 'menu' }]);
+        }
+        if (a.startsWith('cat:')) return showCategory(a.slice(4));
+        if (a.startsWith('prod:')) return showProduct(a.slice(5));
+        if (a.startsWith('info:')) return showInfo(a.slice(5));
+        if (a.startsWith('add:')) { const [id, label] = a.slice(4).split('|'); return addProduct(id, label); }
+    }
+ 
+    /* ---------------- free-text understanding ---------------- */
+    const norm = s => ' ' + s.toLowerCase().replace(/[^a-z0-9\u0600-\u06ff\s]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+    const hasAny = (t, words) => words.some(w => t.includes(' ' + w + ' ') || (w.length > 4 && t.includes(w)));
+ 
+    function findProduct(t) {
+        let best = null, bestLen = 0;
+        Object.entries(ALIASES).forEach(([id, names]) => {
+            if (!byId(id)) return;
+            names.forEach(n => {
+                if (t.includes(' ' + n + ' ') && n.length > bestLen) { best = id; bestLen = n.length; }
+            });
+        });
+        if (best) return best;
+        const p = products().find(x => t.includes(' ' + x.name.toLowerCase() + ' '));
+        return p ? p.id : null;
+    }
+    function findCategory(t) {
+        for (const cat of categories()) {
+            const words = CAT_WORDS[cat] || [cat.toLowerCase()];
+            if (words.some(w => t.includes(' ' + w + ' '))) return cat;
+        }
+        return null;
+    }
+ 
+    function route(raw) {
+        const t = norm(raw);
+        lastUserText = raw;
+ 
+        if (hasAny(t, ['salam', 'assalam', 'aoa', 'hello', 'hi', 'hey', 'slam'])) return showWelcome();
+        if (hasAny(t, ['shukriya', 'shukria', 'thanks', 'thank you', 'thx', 'jazakallah']))
+            return botSay('Aapka shukriya! 😊 Aur kuch poochna ho to bataiye.', mainMenu());
+        if (hasAny(t, ['agent', 'insan', 'banda', 'human', 'call', 'number', 'contact', 'rabta', 'whatsapp', 'baat']))
+            return showContact();
+        if (hasAny(t, ['delivery', 'deliver', 'shipping', 'courier', 'kitne din', 'kab tak', 'charges']))
+            return showDelivery();
+        if (hasAny(t, ['payment', 'cod', 'jazzcash', 'easypaisa', 'cash on delivery', 'paisay', 'paise', 'pay']))
+            return showPayment();
+        if (hasAny(t, ['coupon', 'discount', 'offer', 'promo', 'code', 'sasta', 'off']))
+            return showCoupon();
+        if (hasAny(t, ['cart', 'basket']) ) return showCart();
+        if (hasAny(t, ['checkout', 'confirm']) || (hasAny(t, ['order']) && hasAny(t, ['karna', 'karni', 'karein', 'karo', 'place', 'dena', 'chahiye', 'chahta', 'chahti']))) {
+            const pid = findProduct(t);
+            if (pid) return showProduct(pid);
+            return doAction('checkout');
+        }
+ 
+        const pid = findProduct(t);
+        if (pid) {
+            if (hasAny(t, ['faida', 'faide', 'benefit', 'benefits', 'nutrition', 'kyun', 'fayda'])) return showInfo(pid);
+            return showProduct(pid);
+        }
+        const cat = findCategory(t);
+        if (cat) return showCategory(cat);
+ 
+        if (hasAny(t, ['product', 'products', 'menu', 'list', 'catalog', 'kya kya', 'kia kia', 'items', 'price', 'rate', 'qeemat', 'kimat', 'kitne', 'kitna', 'kya hai', 'sale', 'khareed', 'buy', 'order', 'lena']))
+            return showCategories();
+ 
+        fallback();
+    }
+ 
+    /* ---------------- events ---------------- */
+    function togglePanel(open) {
+        const willOpen = open === undefined ? !panel.classList.contains('dp-open') : open;
+        panel.classList.toggle('dp-open', willOpen);
+        const dot = btn.querySelector('.dp-dot');
+        if (willOpen) {
+            if (dot) dot.remove();
+            if (!greeted) { greeted = true; showWelcome(); }
+            setTimeout(() => input.focus(), 50);
+        }
+    }
+ 
+    btn.addEventListener('click', () => togglePanel());
+    panel.querySelector('.dp-x').addEventListener('click', () => togglePanel(false));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') togglePanel(false); });
+ 
+    msgs.addEventListener('click', e => {
+        const chip = e.target.closest('.dp-chip[data-a]');
+        if (!chip) return;
+        userSay(chip.textContent);
+        doAction(chip.dataset.a);
+    });
+ 
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        userSay(text);
+        route(text);
+    });
+})();
+ 
