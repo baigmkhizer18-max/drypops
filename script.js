@@ -1062,7 +1062,7 @@ function showToast(msg) {
             `Delivery: ${fee === 0 ? 'currently free' : `Rs. ${fee} fee, free above Rs. ${min}`}. Delivery time depends on the city and is confirmed on WhatsApp.`,
             `Payment methods: ${pay}. For JazzCash/Easypaisa, account details are sent on WhatsApp.`,
             `Coupons: ${coupons}. Applied at checkout.`,
-            'Contact: WhatsApp / phone 03282288801, email drypops@gmail.com.',
+            'Contact: WhatsApp / phone 03282288801, email drypops1@gmail.com.',
             'Products:', ...lines
         ].join('\n');
     }
@@ -1316,7 +1316,7 @@ function showToast(msg) {
     }
  
     function showContact() {
-        botSay('📞 Phone: <b>03282288801</b><br>📧 Email: drypops@gmail.com<br>The fastest way to reach us is WhatsApp:',
+        botSay('📞 Phone: <b>03282288801</b><br>📧 Email: drypops1@gmail.com<br>The fastest way to reach us is WhatsApp:',
             [agentChip(), { label: '⬅ Menu', a: 'menu' }]);
     }
  
