@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DryPops - Organic Dry Fruits, Oils, Honey & Seeds</title>
-    <meta name="description" content="Order organic dry fruits, cold-pressed oils, raw Sidr honey and healthy seeds in 50g, 100g and 200g packs. Delivery across Pakistan.">
+    <meta name="description" content="Order organic dry fruits, cold-pressed oils, raw Sidr honey, healthy seeds, herbs and snacks in 50g, 100g and 200g packs. Delivery across Pakistan.">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
     <script>try{if(localStorage.getItem('drypops-theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}</script>
     
@@ -163,6 +163,8 @@
                     <a href="#honey" onclick="filterCategory('Honey'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Honey</a>
                     <a href="#seeds" onclick="filterCategory('Seeds'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Seeds</a>
                     <a href="#salt" onclick="filterCategory('Salt'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Salt</a>
+                    <a href="#herbs" onclick="filterCategory('Herbs'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Herbs</a>
+                    <a href="#snacks" onclick="filterCategory('Snacks'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Snacks</a>
                     <a href="#box-builder" onclick="goToSection('box-builder'); return false;" class="text-goldenHoney font-bold flex items-center gap-1"><i class="fa-solid fa-gift"></i> Gift Box Builder</a>
                     <a href="#quiz" onclick="goToSection('quiz'); return false;" class="hover:text-goldenHoney transition-colors flex items-center gap-1"><i class="fa-solid fa-wand-magic-sparkles text-goldenHoney"></i> Find Your Mix</a>
                 </div>
@@ -240,6 +242,8 @@
                         <button type="button" data-category="Honey" onclick="filterCategory('Honey')" class="filter-btn px-4 py-2 rounded-xl whitespace-nowrap transition-all active:scale-95 text-darkText dark:text-cream hover:bg-goldenLight/40 dark:hover:bg-slate-700">Honey</button>
                         <button type="button" data-category="Seeds" onclick="filterCategory('Seeds')" class="filter-btn px-4 py-2 rounded-xl whitespace-nowrap transition-all active:scale-95 text-darkText dark:text-cream hover:bg-goldenLight/40 dark:hover:bg-slate-700">Seeds</button>
                         <button type="button" data-category="Salt" onclick="filterCategory('Salt')" class="filter-btn px-4 py-2 rounded-xl whitespace-nowrap transition-all active:scale-95 text-darkText dark:text-cream hover:bg-goldenLight/40 dark:hover:bg-slate-700">Salt</button>
+                        <button type="button" data-category="Herbs" onclick="filterCategory('Herbs')" class="filter-btn px-4 py-2 rounded-xl whitespace-nowrap transition-all active:scale-95 text-darkText dark:text-cream hover:bg-goldenLight/40 dark:hover:bg-slate-700">Herbs</button>
+                        <button type="button" data-category="Snacks" onclick="filterCategory('Snacks')" class="filter-btn px-4 py-2 rounded-xl whitespace-nowrap transition-all active:scale-95 text-darkText dark:text-cream hover:bg-goldenLight/40 dark:hover:bg-slate-700">Snacks</button>
                     </div>
                     <p class="text-xs font-bold text-deepBrown dark:text-goldenHoney flex items-center gap-1.5 bg-goldenHoney/10 px-3 py-1.5 rounded-full border border-goldenHoney/20">
                         <i class="fa-solid fa-scale-balanced text-goldenHoney"></i> Choose your pack size on every product
@@ -491,7 +495,7 @@
         <div id="searchModalBox" class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl relative border border-goldenHoney/30 modal-animated modal-hidden">
             <button onclick="toggleSearchModal()" aria-label="Close search" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 text-xl transition-colors"><i class="fa-solid fa-xmark"></i></button>
             <h3 class="font-bold text-deepBrown dark:text-cream text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-magnifying-glass text-goldenHoney"></i> Search Products</h3>
-            <input type="text" id="searchInput" oninput="handleSearch(this.value)" aria-label="Search products" placeholder="Search raisins, honey, oils, seeds..." class="w-full bg-cream dark:bg-slate-700 border border-goldenHoney/30 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-goldenHoney transition-colors">
+            <input type="text" id="searchInput" oninput="handleSearch(this.value)" aria-label="Search products" placeholder="Search raisins, honey, oats, tea, chana..." class="w-full bg-cream dark:bg-slate-700 border border-goldenHoney/30 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-goldenHoney transition-colors">
             <div id="searchResults" class="mt-4 max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700 text-xs"></div>
         </div>
     </div>

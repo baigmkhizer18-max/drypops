@@ -162,6 +162,21 @@ const DB_API = {
             ]
         },
         { 
+            id: 'sd-5', 
+            name: 'Oats', 
+            category: 'Seeds', 
+            stock: 50, 
+            image: 'images/oats (1) (1).png', 
+            desc: 'Clean whole grain rolled oats, ideal for a quick and healthy breakfast.',
+            nutrition: 'Energy: 389 kcal, Protein: 17g, Fiber: 10g (per 100g)',
+            benefits: 'Keeps you full for longer, supports heart health, and gives steady natural energy.',
+            weights: [
+                { label: '50g', price: 100 },
+                { label: '100g', price: 180 },
+                { label: '200g', price: 340 }
+            ]
+        },
+        { 
             id: 'sl-1', 
             name: 'Himalayan Pink Salt', 
             category: 'Salt', 
@@ -189,6 +204,36 @@ const DB_API = {
                 { label: '50g', price: 80 },
                 { label: '100g', price: 150 },
                 { label: '200g', price: 280 }
+            ]
+        },
+        { 
+            id: 'tl-1', 
+            name: 'Lemon Grass Tea', 
+            category: 'Herbs', 
+            stock: 50, 
+            image: 'images/lemon grass tea (1) (1).png', 
+            desc: 'Pure dried lemon grass leaves with a fresh citrus aroma. A soothing, caffeine-free herbal tea.',
+            nutrition: 'Caffeine-free and almost zero calories per cup when taken without sugar.',
+            benefits: 'A warm, refreshing herbal drink that helps you relax and feel light after meals. Best enjoyed with a spoon of honey.',
+            weights: [
+                { label: '50g', price: 150 },
+                { label: '100g', price: 280 },
+                { label: '200g', price: 520 }
+            ]
+        },
+        { 
+            id: 'sn-1', 
+            name: 'Roasted Chickpeas', 
+            category: 'Snacks', 
+            stock: 50, 
+            image: 'images/roasted chickpeas (1) (1).png', 
+            desc: 'Crunchy roasted chickpeas (Bhuna Chana), a light and protein-rich everyday snack.',
+            nutrition: 'Energy: 364 kcal, Protein: 19g, Fiber: 17g (per 100g)',
+            benefits: 'A filling, high-protein snack that supports digestion and keeps hunger away between meals.',
+            weights: [
+                { label: '50g', price: 90 },
+                { label: '100g', price: 160 },
+                { label: '200g', price: 300 }
             ]
         }
     ],
@@ -393,7 +438,7 @@ function updateCardWeightPrice(productId, selectEl) {
  
 function renderHomePageProducts() {
     const container = document.getElementById('dynamicProductsContainer');
-    const categories = ['Dry Fruits', 'Oils', 'Honey', 'Seeds', 'Salt'];
+    const categories = ['Dry Fruits', 'Oils', 'Honey', 'Seeds', 'Salt', 'Herbs', 'Snacks'];
  
     container.innerHTML = categories.map((cat, idx) => {
         const catProducts = DB_API.products.filter(p => p.category === cat);
@@ -1037,15 +1082,20 @@ function showToast(msg) {
         'sd-2': ['sunflower', 'sunflower seeds'],
         'sd-3': ['pumpkin', 'pumpkin seeds'],
         'sd-4': ['melon', 'char maghaz', 'melon seeds'],
+        'sd-5': ['oats', 'oat', 'rolled oats', 'jau'],
         'sl-1': ['pink salt', 'himalayan', 'himalayan salt', 'pink'],
-        'sl-2': ['black salt', 'kala namak', 'black']
+        'sl-2': ['black salt', 'kala namak', 'black'],
+        'tl-1': ['lemon grass', 'lemongrass', 'lemon grass tea', 'lemongrass tea', 'herbal tea', 'tea'],
+        'sn-1': ['chickpeas', 'chickpea', 'chana', 'bhuna chana', 'roasted chana', 'roasted chickpeas']
     };
     const CAT_WORDS = {
         'Dry Fruits': ['dry fruit', 'dry fruits', 'dryfruit', 'dryfruits'],
         'Oils': ['oil', 'oils'],
         'Honey': ['honey'],
         'Seeds': ['seed', 'seeds'],
-        'Salt': ['salt', 'salts']
+        'Salt': ['salt', 'salts'],
+        'Herbs': ['herb', 'herbs', 'herbal', 'tea', 'teas', 'chai'],
+        'Snacks': ['snack', 'snacks']
     };
  
     /* Live store knowledge sent to the AI with every question */
@@ -1058,7 +1108,7 @@ function showToast(msg) {
         const coupons = Object.entries(SHOP_CONFIG.COUPONS || {}).map(([k, v]) => `${k} = ${v}% off`).join(', ') || 'none';
         const pay = Object.values(typeof PAYMENT_LABELS !== 'undefined' ? PAYMENT_LABELS : { COD: 'Cash on Delivery' }).join(', ');
         return [
-            'Store: DryPops (drypops.pk), online store for dry fruits, oils, honey, seeds and salts. Delivery across Pakistan.',
+            'Store: DryPops (drypops.pk), online store for dry fruits, oils, honey, seeds, salts, herbs and snacks. Delivery across Pakistan.',
             `Delivery: ${fee === 0 ? 'currently free' : `Rs. ${fee} fee, free above Rs. ${min}`}. Delivery time depends on the city and is confirmed on WhatsApp.`,
             `Payment methods: ${pay}. For JazzCash/Easypaisa, account details are sent on WhatsApp.`,
             `Coupons: ${coupons}. Applied at checkout.`,
