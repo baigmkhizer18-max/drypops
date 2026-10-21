@@ -10,9 +10,9 @@ const DB_API = {
             nutrition: 'Energy: 299 kcal, Potassium: 749mg, Fiber: 3.7g (per 100g)',
             benefits: 'Aids digestive health, supports iron absorption, and works as an instant energy boost.',
             weights: [
-                { label: '50g', price: 250 },
                 { label: '100g', price: 480 },
-                { label: '200g', price: 900 }
+                { label: '200g', price: 900 },
+                { label: '500g', price: 2200 }
             ]
         },
         { 
@@ -25,9 +25,9 @@ const DB_API = {
             nutrition: 'Energy: 282 kcal, Potassium: 656mg, Fiber: 8g (per 100g)',
             benefits: 'Gives instant natural energy, supports digestion, and is rich in iron and minerals.',
             weights: [
-                { label: '50g', price: 200 },
-                { label: '100g', price: 380 },
-                { label: '200g', price: 720 }
+                { label: '250g', price: 900 },
+                { label: '500g', price: 1750 },
+                { label: '1kg', price: 3400 }
             ]
         },
         { 
@@ -40,8 +40,8 @@ const DB_API = {
             nutrition: 'Monounsaturated Fats: 60%, Omega-3 & Omega-6 balance.',
             benefits: 'Stimulates hair growth, improves cardiovascular wellness, and enhances meal flavor.',
             weights: [
-                { label: '120ml', price: 250 },
-                { label: '250ml', price: 450 },
+                { label: '100ml', price: 210 },
+                { label: '200ml', price: 360 }
             ]
         },
         { 
@@ -55,7 +55,7 @@ const DB_API = {
             benefits: 'Deeply nourishes skin, boosts metabolic rate, and conditions dry hair naturally.',
             weights: [
                 { label: '100ml', price: 600 },
-                { label: '200ml', price: 1100 },
+                { label: '200ml', price: 1100 }
             ]
         },
         { 
@@ -68,8 +68,8 @@ const DB_API = {
             nutrition: 'High Vitamin E concentration, Omega-9 oleic acid.',
             benefits: 'Enhances facial glow, relieves constipation when consumed, and soothes scalp.',
             weights: [
-                { label: '120ml', price: 650 },
-                { label: '250ml', price: 1450 },
+                { label: '100ml', price: 540 },
+                { label: '200ml', price: 1160 }
             ]
         },
         { 
@@ -82,8 +82,8 @@ const DB_API = {
             nutrition: 'Monounsaturated Fats: 73%, Rich in Vitamin E and polyphenol antioxidants.',
             benefits: 'Supports heart health, reduces inflammation, and nourishes skin and hair.',
             weights: [
-                { label: '120ml', price: 500 },
-                { label: '250ml', price: 950 },
+                { label: '100ml', price: 420 },
+                { label: '200ml', price: 760 }
             ]
         },
         { 
@@ -171,9 +171,9 @@ const DB_API = {
             nutrition: 'Energy: 389 kcal, Protein: 17g, Fiber: 10g (per 100g)',
             benefits: 'Keeps you full for longer, supports heart health, and gives steady natural energy.',
             weights: [
-                { label: '50g', price: 100 },
-                { label: '100g', price: 180 },
-                { label: '200g', price: 340 }
+                { label: '250g', price: 430 },
+                { label: '500g', price: 850 },
+                { label: '1kg', price: 1650 }
             ]
         },
         { 
@@ -231,9 +231,9 @@ const DB_API = {
             nutrition: 'Energy: 364 kcal, Protein: 19g, Fiber: 17g (per 100g)',
             benefits: 'A filling, high-protein snack that supports digestion and keeps hunger away between meals.',
             weights: [
-                { label: '50g', price: 90 },
-                { label: '100g', price: 160 },
-                { label: '200g', price: 300 }
+                { label: '250g', price: 370 },
+                { label: '500g', price: 720 },
+                { label: '1kg', price: 1400 }
             ]
         }
     ],
