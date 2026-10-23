@@ -80,7 +80,9 @@
  
     <!-- Top Announcement Bar -->
     <div class="bg-deepBrownDark text-goldenLight text-xs sm:text-sm py-2.5 px-4 border-b border-goldenHoney/30">
-            <div class="flex items-center space-x-4 ml-auto">
+        <div class="max-w-7xl mx-auto flex flex-col lg:grid lg:grid-cols-[1fr_auto_1fr] items-center gap-1.5 lg:gap-4">
+            <!-- Contact -->
+            <div class="flex items-center space-x-4 order-2 lg:order-1 lg:justify-self-start">
                 <a href="tel:03282288801" class="hover:text-goldenHoney transition-colors flex items-center gap-1.5 font-medium">
                     <i class="fa-solid fa-phone text-goldenHoney"></i> 03282288801
                 </a>
@@ -89,6 +91,12 @@
                     <i class="fa-brands fa-whatsapp text-goldenHoney text-base"></i> Chat on WhatsApp
                 </a>
             </div>
+            <!-- Free shipping message (centered) -->
+            <p class="order-1 lg:order-2 text-center font-bold text-goldenHoney flex items-center justify-center gap-2">
+                <i class="fa-solid fa-truck-fast"></i> Free Shipping on Orders of Rs. 2,500 or More!
+            </p>
+            <!-- Spacer keeps the message truly centered on wide screens -->
+            <div class="hidden lg:block order-3"></div>
         </div>
     </div>
  
@@ -148,6 +156,7 @@
             <nav class="max-w-7xl mx-auto px-4 py-2 flex flex-col text-sm font-bold text-cream/90" aria-label="Mobile">
                 <a href="#" onclick="showView('home'); closeMobileMenu(); return false;" class="py-3 border-b border-goldenHoney/10 flex items-center gap-2"><i class="fa-solid fa-house text-goldenHoney/70 w-5"></i> Home</a>
                 <a href="#dynamicProductsContainer" onclick="filterCategory('all'); return false;" class="py-3 border-b border-goldenHoney/10 flex items-center gap-2"><i class="fa-solid fa-store text-goldenHoney/70 w-5"></i> Shop</a>
+                <a href="#deals" onclick="goToSection('deals'); return false;" class="py-3 border-b border-goldenHoney/10 flex items-center gap-2"><i class="fa-solid fa-tags text-goldenHoney/70 w-5"></i> Deals</a>
                 <a href="#about-us" onclick="goToSection('about-us'); return false;" class="py-3 border-b border-goldenHoney/10 flex items-center gap-2"><i class="fa-solid fa-circle-info text-goldenHoney/70 w-5"></i> About Us</a>
                 <a href="#contact-us" onclick="goToSection('contact-us'); return false;" class="py-3 border-b border-goldenHoney/10 flex items-center gap-2"><i class="fa-solid fa-envelope text-goldenHoney/70 w-5"></i> Contact Us</a>
                 <button type="button" onclick="toggleDarkMode()" class="py-3 flex items-center gap-2 text-left"><i class="fa-solid fa-circle-half-stroke text-goldenHoney/70 w-5"></i> Dark / Light mode</button>
@@ -165,6 +174,7 @@
                     <a href="#salt" onclick="filterCategory('Salt'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Salt</a>
                     <a href="#herbs" onclick="filterCategory('Herbs'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Herbs</a>
                     <a href="#snacks" onclick="filterCategory('Snacks'); return false;" class="hover:text-goldenHoney transition-colors inline-block">Snacks</a>
+                    <a href="#deals" onclick="goToSection('deals'); return false;" class="text-goldenHoney font-bold flex items-center gap-1"><i class="fa-solid fa-tags"></i> Deals</a>
                     <a href="#box-builder" onclick="goToSection('box-builder'); return false;" class="text-goldenHoney font-bold flex items-center gap-1"><i class="fa-solid fa-gift"></i> Gift Box Builder</a>
                     <a href="#quiz" onclick="goToSection('quiz'); return false;" class="hover:text-goldenHoney transition-colors flex items-center gap-1"><i class="fa-solid fa-wand-magic-sparkles text-goldenHoney"></i> Find Your Mix</a>
                 </div>
@@ -253,6 +263,20 @@
  
             <!-- Dynamic Product Sections -->
             <div id="dynamicProductsContainer"></div>
+ 
+            <!-- Deals Section -->
+            <section id="deals" class="py-16 bg-white dark:bg-slate-900 border-t border-goldenHoney/20 overflow-hidden">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-10" data-aos="fade-up">
+                        <span class="text-xs font-bold uppercase tracking-widest text-olive bg-olive/10 px-3 py-1 rounded-full">Special Offers</span>
+                        <h2 class="text-3xl font-extrabold text-deepBrown dark:text-cream mt-3">Seed Deals</h2>
+                        <p class="text-darkText/70 dark:text-slate-400 mt-2 text-xs sm:text-sm">Bundle packs at a special price, with a surprise gift!</p>
+                    </div>
+                    <div id="dealsContainer" class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                        <!-- Populated Dynamically -->
+                    </div>
+                </div>
+            </section>
  
             <!-- Gift Box Builder Section -->
             <section id="box-builder" class="py-16 bg-cream dark:bg-slate-900 border-t border-goldenHoney/20 overflow-hidden">

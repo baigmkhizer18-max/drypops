@@ -247,7 +247,7 @@ const SHOP_CONFIG = {
     // Delivery fee charged when the order is BELOW FREE_SHIPPING_MIN.
     // 0 = delivery is free for every order (shipping rate not decided yet).
     SHIPPING_FEE: 0,
-    FREE_SHIPPING_MIN: 2000,
+    FREE_SHIPPING_MIN: 2500,
  
     WHATSAPP_NUMBER: '923282288801',
  
@@ -316,6 +316,7 @@ window.addEventListener('DOMContentLoaded', () => {
     sanitizeStoredState();
     renderHomePageProducts();
     renderBoxBuilderOptions();
+    renderDeals();
     updateCartUI();
     refreshWishlistUI();
  
@@ -639,6 +640,67 @@ function updateBoxUI() {
     total.innerText = formatPrice(sum);
 }
  
+/* ===================== seed deals ===================== */
+// Edit prices / items here. Flax is not in the shop catalogue, so only the
+// products listed in "components" are stock-checked; Flax is listed in "items" for display.
+const DEALS = [
+    {
+        id: 'deal-4x100',
+        title: 'Deal 1: 4 Seeds (All 100g)',
+        items: ['Chia 100g', 'Pumpkin 100g', 'Flax 100g', 'Sunflower 100g'],
+        components: ['sd-1', 'sd-3', 'sd-2'],
+        price: 1375,
+        text: 'Buy a Pack of Four for Rs. 1,375 and Get a Surprise Gift!'
+    },
+    {
+        id: 'deal-5x50',
+        title: 'Deal 2: 5 Seeds (All 50g)',
+        items: ['Chia 50g', 'Flax 50g', 'Melon 50g', 'Pumpkin 50g', 'Sunflower 50g'],
+        components: ['sd-1', 'sd-4', 'sd-3', 'sd-2'],
+        price: 900,
+        text: 'Buy 5 Packs for Rs. 900 and Get a Surprise Gift!'
+    }
+];
+
+function renderDeals() {
+    const el = document.getElementById('dealsContainer');
+    if (!el) return;
+    el.innerHTML = DEALS.map((d, i) => `
+        <div class="interactive-card bg-cream/60 dark:bg-slate-800 rounded-3xl border-2 border-goldenHoney/40 p-6 flex flex-col justify-between" data-aos="fade-up" data-aos-delay="${(i + 1) * 100}">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-extrabold text-lg text-deepBrown dark:text-cream">${escapeHtml(d.title)}</h3>
+                    <i class="fa-solid fa-gift text-goldenHoney text-xl"></i>
+                </div>
+                <ul class="space-y-1.5 text-sm text-darkText dark:text-slate-300 mb-4">
+                    ${d.items.map(x => `<li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-olive text-xs"></i> ${escapeHtml(x)}</li>`).join('')}
+                </ul>
+                <p class="text-xs font-semibold text-olive">${escapeHtml(d.text)}</p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-goldenHoney/20 flex items-center justify-between">
+                <span class="font-extrabold text-goldenHoney text-2xl">${formatPrice(d.price)}</span>
+                <button type="button" onclick="addDealToCart('${d.id}')" class="bg-olive hover:bg-oliveHover text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-md btn-shine">
+                    Add Deal To Cart
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function addDealToCart(dealId) {
+    const d = DEALS.find(x => x.id === dealId);
+    if (!d) return;
+    addToCart({
+        key: d.id,
+        id: d.id,
+        title: d.title,
+        price: d.price,
+        weightLabel: 'Deal Pack',
+        components: d.components,
+        details: d.items.concat(['Surprise Gift'])
+    });
+}
+
 function removeBoxItem(index) {
     customBox.splice(index, 1);
     updateBoxUI();
@@ -1530,4 +1592,3 @@ function showToast(msg) {
         handleText(text);
     });
 })();
- 
