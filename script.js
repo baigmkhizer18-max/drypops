@@ -245,8 +245,8 @@ const DB_API = {
    ===================================================================== */
 const SHOP_CONFIG = {
     // Delivery fee charged when the order is BELOW FREE_SHIPPING_MIN.
-    // 0 = delivery is free for every order (shipping rate not decided yet).
-    SHIPPING_FEE: 0,
+    // Rs. 250 delivery on orders below FREE_SHIPPING_MIN (set 0 to make delivery free for everyone).
+    SHIPPING_FEE: 250,
     FREE_SHIPPING_MIN: 2500,
  
     WHATSAPP_NUMBER: '923282288801',
@@ -661,7 +661,7 @@ const DEALS = [
         text: 'Buy 5 Packs for Rs. 900 and Get a Surprise Gift!'
     }
 ];
-
+ 
 function renderDeals() {
     const el = document.getElementById('dealsContainer');
     if (!el) return;
@@ -686,7 +686,7 @@ function renderDeals() {
         </div>
     `).join('');
 }
-
+ 
 function addDealToCart(dealId) {
     const d = DEALS.find(x => x.id === dealId);
     if (!d) return;
@@ -700,7 +700,7 @@ function addDealToCart(dealId) {
         details: d.items.concat(['Surprise Gift'])
     });
 }
-
+ 
 function removeBoxItem(index) {
     customBox.splice(index, 1);
     updateBoxUI();
