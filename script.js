@@ -940,37 +940,107 @@ function handleCheckoutSubmit(e) {
  
     DB_API.orders.push(order);
  
-    // Send the order to the Seller Center backend (see orders-sync.js)
-    if (typeof sendOrderToBackend === 'function') sendOrderToBackend(order);
- 
-    const note = paymentMethod === 'WALLET'
-        ? 'We will message you on WhatsApp with our JazzCash / Easypaisa details. Your order is confirmed once payment is received.'
-        : 'Please keep the amount ready. You pay when your order is delivered.';
- 
-    document.getElementById('orderSuccessSummary').innerHTML = `
-        <p><strong>Order ID:</strong> <span class="text-goldenHoney font-extrabold">${order.ref}</span></p>
-        <p><strong>Customer:</strong> ${escapeHtml(order.name)} (${escapeHtml(order.phone)})</p>
-        <p><strong>Delivery Address:</strong> ${escapeHtml(order.address)}, ${escapeHtml(order.city)}</p>
-        <p><strong>Payment Method:</strong> ${PAYMENT_LABELS[paymentMethod]}</p>
-        <p class="mt-2 pt-2 border-t font-extrabold text-sm text-deepBrown dark:text-goldenLight">Items:</p>
-        <ul class="list-disc pl-4 space-y-1 my-1">
-            ${order.items.map(i => `<li>${escapeHtml(i.title)} x ${i.quantity} - ${formatPrice(i.price * i.quantity)}</li>`).join('')}
-        </ul>
-        <p class="pt-2 border-t font-extrabold text-sm text-deepBrown dark:text-goldenLight">Total to Pay: ${formatPrice(order.amount)}</p>
-        <p class="text-slate-500 dark:text-slate-400">${note}</p>
-    `;
-    document.getElementById('orderWhatsAppBtn').href = buildOrderMessage(order);
- 
-    // Reset checkout state
+    // FIX 1: empty the cart IMMEDIATELY (memory + saved copy in the browser),
+    // before anything else that could fail. Otherwise a single error further
+    // down leaves the old cart in localStorage and it comes back on reload.
     cart = [];
     appliedDiscountPercent = 0;
-    document.getElementById('couponCodeInput').value = '';
-    document.getElementById('couponMsg').className = 'hidden';
-    e.target.reset();
-    togglePaymentFields('COD');
+    try { localStorage.removeItem('drypops-cart'); } catch (err) { /* ignore */ }
+ 
+    // Send the order to the Seller Center backend (see orders-sync.js).
+    // Wrapped so a backend problem can never block the customer's confirmation.
+    try {
+        if (typeof sendOrderToBackend === 'function') sendOrderToBackend(order);
+    } catch (err) { console.error('Order sync failed:', err); }
+ 
+    // FIX 2: full order slip the customer can screenshot as proof
+    document.getElementById('orderSuccessSummary').innerHTML = buildOrderSlip(order);
+    document.getElementById('orderWhatsAppBtn').href = buildOrderMessage(order);
+ 
+    // Reset the checkout form and the rest of the UI
+    try {
+        document.getElementById('couponCodeInput').value = '';
+        document.getElementById('couponMsg').className = 'hidden';
+        e.target.reset();
+        togglePaymentFields('COD');
+    } catch (err) { console.error(err); }
     updateCartUI();
     renderHomePageProducts();
+    renderCheckoutSummary();
     showView('order-success');
+}
+ 
+function buildOrderSlip(order) {
+    const when = new Date(order.date).toLocaleString('en-GB', {
+        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+    const payLabel = PAYMENT_LABELS[order.paymentMethod] || order.paymentMethod;
+    const note = order.paymentMethod === 'WALLET'
+        ? 'We will message you on WhatsApp with our JazzCash / Easypaisa details. Your order is confirmed once payment is received.'
+        : 'Please keep the exact amount ready. You pay when your order is delivered.';
+    const row = (label, value) => `
+        <div class="flex justify-between gap-4 py-1.5 border-b border-dashed border-slate-300">
+            <span class="text-slate-500 shrink-0">${label}</span>
+            <span class="font-bold text-slate-900 text-right break-words">${value}</span>
+        </div>`;
+ 
+    const itemsHtml = order.items.map((i, idx) => `
+        <div class="flex justify-between gap-3 py-1.5 border-b border-dashed border-slate-300">
+            <div class="min-w-0">
+                <p class="font-bold text-slate-900">${idx + 1}. ${escapeHtml(i.title)}</p>
+                ${i.details ? `<p class="text-[11px] text-slate-500">${i.details.map(escapeHtml).join(', ')}</p>` : ''}
+                <p class="text-slate-500">${formatPrice(i.price)} x ${i.quantity}</p>
+            </div>
+            <span class="font-bold text-slate-900 whitespace-nowrap">${formatPrice(i.price * i.quantity)}</span>
+        </div>`).join('');
+ 
+    return `
+    <div id="orderSlip" class="bg-white text-slate-800 rounded-2xl border-2 border-dashed border-goldenHoney p-5 sm:p-7 text-xs shadow-lg">
+        <div class="text-center pb-4 border-b-2 border-slate-800">
+            <h2 class="text-xl font-extrabold text-deepBrown tracking-wide">DryPops</h2>
+            <p class="text-[11px] text-slate-500">drypops.pk</p>
+            <p class="mt-2 font-extrabold text-sm tracking-widest text-slate-900">ORDER SLIP</p>
+        </div>
+ 
+        <div class="text-center py-4 border-b border-dashed border-slate-300">
+            <p class="text-slate-500">Order Number</p>
+            <p class="text-2xl font-extrabold text-goldenHoney tracking-wider">${escapeHtml(order.ref)}</p>
+            <p class="text-slate-500 mt-1">${when}</p>
+        </div>
+ 
+        <div class="py-3">
+            <p class="font-extrabold text-slate-900 mb-1 uppercase tracking-wide">Customer Details</p>
+            ${row('Name', escapeHtml(order.name))}
+            ${row('Phone / WhatsApp', escapeHtml(order.phone))}
+            ${order.email ? row('Email', escapeHtml(order.email)) : ''}
+            ${row('Address', escapeHtml(order.address))}
+            ${row('City', escapeHtml(order.city))}
+            ${row('Payment', escapeHtml(payLabel))}
+        </div>
+ 
+        <div class="py-3">
+            <p class="font-extrabold text-slate-900 mb-1 uppercase tracking-wide">Items Ordered</p>
+            ${itemsHtml}
+        </div>
+ 
+        <div class="pt-2 space-y-1">
+            <div class="flex justify-between"><span class="text-slate-500">Subtotal</span><span class="font-bold text-slate-900">${formatPrice(order.subtotal)}</span></div>
+            ${order.discount ? `<div class="flex justify-between"><span class="text-slate-500">Discount</span><span class="font-bold text-emerald-700">- ${formatPrice(order.discount)}</span></div>` : ''}
+            <div class="flex justify-between"><span class="text-slate-500">Delivery</span><span class="font-bold text-slate-900">${order.shipping === 0 ? 'FREE' : formatPrice(order.shipping)}</span></div>
+            <div class="flex justify-between text-base font-extrabold text-deepBrown pt-2 mt-1 border-t-2 border-slate-800">
+                <span>TOTAL TO PAY</span><span>${formatPrice(order.amount)}</span>
+            </div>
+        </div>
+ 
+        <p class="mt-4 text-center text-slate-600 leading-relaxed">${note}</p>
+        <div class="mt-4 pt-3 border-t border-dashed border-slate-300 text-center text-[11px] text-slate-500">
+            <p>Questions? WhatsApp / call: 0328-2288801</p>
+            <p>Thank you for shopping with DryPops!</p>
+        </div>
+    </div>
+    <p class="text-center text-[11px] text-slate-500 dark:text-slate-400 mt-3">
+        <i class="fa-solid fa-camera"></i> Please take a screenshot of this slip and keep it as proof of your order.
+    </p>`;
 }
  
 function checkoutViaWhatsApp() {
