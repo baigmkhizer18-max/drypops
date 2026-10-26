@@ -178,7 +178,7 @@ const DB_API = {
         },
         { 
             id: 'sl-1', 
-            name: 'Himalayan Pink Salt', 
+            name: 'coarse Pink Salt', 
             category: 'Salt', 
             stock: 50, 
             image: 'images/salt pink (1).png', 
@@ -186,9 +186,8 @@ const DB_API = {
             nutrition: 'Sodium: ~38g, naturally contains trace minerals like magnesium, calcium and potassium (per 100g).',
             benefits: 'Adds rich flavor to food, provides trace minerals, and is a purer alternative to refined table salt.',
             weights: [
-                { label: '50g', price: 80 },
-                { label: '100g', price: 150 },
-                { label: '200g', price: 280 }
+                { label: '385g', price: 150 },
+                
             ]
         },
         { 
@@ -201,9 +200,8 @@ const DB_API = {
             nutrition: 'Sodium: ~36g, contains sulphur compounds and trace minerals (per 100g).',
             benefits: 'Aids digestion, helps relieve bloating and gas, and adds a unique taste to snacks.',
             weights: [
-                { label: '50g', price: 80 },
-                { label: '100g', price: 150 },
-                { label: '200g', price: 280 }
+                { label: '385g', price: 150 },
+               
             ]
         },
         { 
@@ -234,6 +232,65 @@ const DB_API = {
                 { label: '250g', price: 350 },
                 { label: '500g', price: 650 },
                 { label: '1kg', price: 1200 }
+            ]
+        },
+        { 
+            id: 'df-4', 
+            name: 'Dry Dates (N)', 
+            category: 'Dry Fruits', 
+            stock: 50, 
+            image: 'images/dry dates n.png', 
+            desc: 'Premium dry dates (N), naturally sweet and soft, a wholesome everyday treat.',
+            nutrition: 'Rich in natural sugars, fiber, potassium and iron.',
+            benefits: 'Gives instant natural energy, supports digestion, and is a healthy alternative to sugary snacks.',
+            weights: [
+                { label: '250g', price: 400 },
+                { label: '500g', price: 750 },
+                { label: '1kg', price: 1400 }
+            ]
+        },
+        { 
+            id: 'sd-6', 
+            name: 'White Sesame', 
+            category: 'Seeds', 
+            stock: 50, 
+            image: 'images/moringa.png', 
+            desc: 'Clean, hulled white sesame seeds (Safed Til) for cooking, baking and sweets.',
+            nutrition: 'Rich in calcium, healthy fats, copper and magnesium.',
+            benefits: 'Supports bone health, adds a nutty flavor to meals, and is a good source of healthy fats.',
+            weights: [
+                { label: '100g', price: 250 },
+                { label: '200g', price: 350 }
+            ]
+        },
+        { 
+            id: 'sl-3', 
+            name: 'Refined Pink Salt', 
+            category: 'Salt', 
+            stock: 50, 
+            image: 'images/refine.png', 
+            desc: 'Finely ground refined pink salt, clean and easy to use for everyday cooking and table use.',
+            nutrition: 'Sodium: ~38g, contains trace minerals (per 100g).',
+            benefits: 'Fine texture dissolves quickly in food and adds a mild, balanced salty flavor.',
+            weights: [
+                { label: '385g', price: 150 },
+                { label: '1kg', price: 200 },
+                
+            ]
+        },
+        { 
+            id: 'hb-1', 
+            name: 'Moringa Powder', 
+            category: 'Herbs', 
+            stock: 50, 
+            image: 'images/white.png', 
+            desc: 'Pure dried moringa leaf powder (Sohanjna), finely ground and easy to add to smoothies, tea or meals.',
+            nutrition: 'Rich in iron, calcium, vitamin A and vitamin C, with natural plant antioxidants.',
+            benefits: 'Supports natural energy, boosts daily nutrition, and blends easily into drinks and food.',
+            weights: [
+                { label: '50g', price: 150 },
+                { label: '100g', price: 275 },
+                { label: '200g', price: 400 }
             ]
         }
     ],
@@ -1218,6 +1275,10 @@ function showToast(msg) {
         'sl-1': ['pink salt', 'himalayan', 'himalayan salt', 'pink'],
         'sl-2': ['black salt', 'kala namak', 'black'],
         'tl-1': ['lemon grass', 'lemongrass', 'lemon grass tea', 'lemongrass tea', 'herbal tea', 'tea'],
+        'df-4': ['dry dates n', 'dates n', 'dry dates (n)'],
+        'sd-6': ['white sesame', 'sesame', 'sesame seeds', 'til', 'safed til'],
+        'sl-3': ['refined pink salt', 'refined salt', 'refined pink'],
+        'hb-1': ['moringa', 'moringa powder', 'sohanjna'],
         'sn-1': ['chickpeas', 'chickpea', 'chana', 'bhuna chana', 'roasted chana', 'roasted chickpeas']
     };
     const CAT_WORDS = {
