@@ -920,8 +920,8 @@ function togglePaymentFields(method) {
     document.getElementById('walletNote').classList.toggle('hidden', method !== 'WALLET');
 }
  
-/* ---- Serial order numbers: DP001, DP002, DP003 ... ----
-   Counter is kept in localStorage. To start again from DP001, run
+/* ---- Serial order numbers: DP-001, DP-002, DP-003 ... ----
+   Counter is kept in localStorage. To start again from DP-001, run
    resetOrderCounter() in the browser console (F12 > Console). */
 const ORDER_SEQ_KEY = 'drypops-order-seq';
 function getNextOrderRef() {
@@ -929,11 +929,11 @@ function getNextOrderRef() {
     try { n = parseInt(localStorage.getItem(ORDER_SEQ_KEY), 10) || 0; } catch (e) { /* ignore */ }
     n += 1;
     try { localStorage.setItem(ORDER_SEQ_KEY, String(n)); } catch (e) { /* ignore */ }
-    return 'DP' + String(n).padStart(3, '0');
+    return 'DP-' + String(n).padStart(3, '0');
 }
 function resetOrderCounter() {
     try { localStorage.removeItem(ORDER_SEQ_KEY); } catch (e) { /* ignore */ }
-    console.log('Order counter reset. Next order will be DP001.');
+    console.log('Order counter reset. Next order will be DP-001.');
 }
  
 function buildOrderMessage(order) {
