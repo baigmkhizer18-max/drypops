@@ -239,7 +239,7 @@ const DB_API = {
             name: 'Dry Dates (N)', 
             category: 'Dry Fruits', 
             stock: 50, 
-            image: 'images/dry dates n.png', 
+            image: 'images/nar.png', 
             desc: 'Premium dry dates (N), naturally sweet and soft, a wholesome everyday treat.',
             nutrition: 'Rich in natural sugars, fiber, potassium and iron.',
             benefits: 'Gives instant natural energy, supports digestion, and is a healthy alternative to sugary snacks.',
