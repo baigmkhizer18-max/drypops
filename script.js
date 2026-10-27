@@ -920,6 +920,22 @@ function togglePaymentFields(method) {
     document.getElementById('walletNote').classList.toggle('hidden', method !== 'WALLET');
 }
  
+/* ---- Serial order numbers: DP001, DP002, DP003 ... ----
+   Counter is kept in localStorage. To start again from DP001, run
+   resetOrderCounter() in the browser console (F12 > Console). */
+const ORDER_SEQ_KEY = 'drypops-order-seq';
+function getNextOrderRef() {
+    let n = 0;
+    try { n = parseInt(localStorage.getItem(ORDER_SEQ_KEY), 10) || 0; } catch (e) { /* ignore */ }
+    n += 1;
+    try { localStorage.setItem(ORDER_SEQ_KEY, String(n)); } catch (e) { /* ignore */ }
+    return 'DP' + String(n).padStart(3, '0');
+}
+function resetOrderCounter() {
+    try { localStorage.removeItem(ORDER_SEQ_KEY); } catch (e) { /* ignore */ }
+    console.log('Order counter reset. Next order will be DP001.');
+}
+ 
 function buildOrderMessage(order) {
     const lines = [
         'Hi DryPops! I would like to confirm this order:',
@@ -972,7 +988,7 @@ function handleCheckoutSubmit(e) {
     const t = calcTotals();
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
     const order = {
-        ref: 'DP-' + Math.floor(100000 + Math.random() * 900000),
+        ref: getNextOrderRef(),
         name: document.getElementById('coName').value.trim(),
         phone: phoneEl.value.trim(),
         address: document.getElementById('coAddress').value.trim(),
