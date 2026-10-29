@@ -516,8 +516,8 @@ function renderHomePageProducts() {
                             return `
                             <div class="interactive-card bg-cream/60 dark:bg-slate-800 rounded-2xl border border-goldenHoney/30 p-4 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="${(pIdx + 1) * 100}">
                                 <div>
-                                    <div class="relative overflow-hidden rounded-xl bg-white dark:bg-slate-700 aspect-square mb-3">
-                                        <img src="${imgSrc(p)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.onerror=null;this.src=PLACEHOLDER_IMG" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                                    <div class="relative overflow-hidden rounded-xl bg-white dark:bg-slate-700 mb-3">
+                                        <img src="${imgSrc(p)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.onerror=null;this.src=PLACEHOLDER_IMG" class="block w-full h-auto group-hover:scale-105 transition-transform duration-700">
                                         ${wishButton(p.id, 'absolute top-2.5 right-2.5 bg-white/90 dark:bg-slate-900/80 w-9 h-9 flex items-center justify-center rounded-full text-deepBrown shadow-md transition-all hover:scale-110 active:scale-95')}
                                         <button type="button" onclick="openProductDetail('${p.id}')" class="absolute inset-x-3 bottom-3 bg-deepBrown/90 text-goldenLight text-xs py-2.5 rounded-xl font-bold opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300">
                                             <i class="fa-solid fa-eye mr-1"></i> Quick View Details
@@ -578,7 +578,7 @@ function openProductDetail(productId) {
  
     container.innerHTML = `
         <div class="rounded-3xl overflow-hidden border border-goldenHoney/30 shadow-2xl bg-white dark:bg-slate-800">
-            <img src="${imgSrc(product)}" alt="${escapeHtml(product.name)}" onerror="this.onerror=null;this.src=PLACEHOLDER_IMG" class="w-full h-72 sm:h-[420px] object-cover hover:scale-105 transition-transform duration-700">
+            <img src="${imgSrc(product)}" alt="${escapeHtml(product.name)}" onerror="this.onerror=null;this.src=PLACEHOLDER_IMG" class="block w-full h-auto hover:scale-105 transition-transform duration-700">
         </div>
         <div class="space-y-6">
             <div>
