@@ -716,6 +716,15 @@ const DEALS = [
         components: ['sd-1', 'sd-4', 'sd-3', 'sd-2'],
         price: 900,
         text: 'Buy 5 Packs for Rs. 900 and Get a Surprise Gift!'
+    },
+    {
+        id: 'deal-weekend',
+        title: 'Weekend Deal',
+        items: ['Chia Seeds 100g', 'Pumpkin Seeds 100g', 'Flax Seeds 100g', 'Sunflower Seeds 100g', 'Honey 125g'],
+        components: ['sd-1', 'sd-3', 'sd-2', 'hn-1'],
+        price: 1500,
+        gift: false,
+        text: 'Weekend Special: 4 Seeds + Honey for Rs. 1,500 only!'
     }
 ];
  
@@ -754,7 +763,7 @@ function addDealToCart(dealId) {
         price: d.price,
         weightLabel: 'Deal Pack',
         components: d.components,
-        details: d.items.concat(['Surprise Gift'])
+        details: d.gift === false ? d.items : d.items.concat(['Surprise Gift'])
     });
 }
  
