@@ -921,19 +921,40 @@ function togglePaymentFields(method) {
 }
  
 /* ---- Serial order numbers: DP-001, DP-002, DP-003 ... ----
-   Counter is kept in localStorage. To start again from DP-001, run
-   resetOrderCounter() in the browser console (F12 > Console). */
+   The number comes from a free online counter so it is shared by ALL customers
+   and devices: 1st order 001, 2nd order 002, and so on (no extra files needed).
+   If the counter is not reachable, it falls back to a counter in this browser.
+   To restart from 001, change 'orders' in the URL below to a new name (e.g. 'orders2'). */
+const ORDER_COUNTER_URL = 'https://api.counterapi.dev/v1/drypops-pk/orders/up';
 const ORDER_SEQ_KEY = 'drypops-order-seq';
-function getNextOrderRef() {
+function formatOrderRef(n) {
+    return 'DP-' + String(n).padStart(3, '0');
+}
+function getLocalOrderRef() {
     let n = 0;
     try { n = parseInt(localStorage.getItem(ORDER_SEQ_KEY), 10) || 0; } catch (e) { /* ignore */ }
     n += 1;
     try { localStorage.setItem(ORDER_SEQ_KEY, String(n)); } catch (e) { /* ignore */ }
-    return 'DP-' + String(n).padStart(3, '0');
+    return formatOrderRef(n);
+}
+async function getNextOrderRef() {
+    try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 6000);
+        const res = await fetch(ORDER_COUNTER_URL, { signal: ctrl.signal });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (!data || !Number.isInteger(data.count) || data.count < 1) throw new Error('Bad response');
+        return formatOrderRef(data.count);
+    } catch (err) {
+        console.warn('Server order number unavailable, using local counter:', err);
+        return getLocalOrderRef();
+    }
 }
 function resetOrderCounter() {
     try { localStorage.removeItem(ORDER_SEQ_KEY); } catch (e) { /* ignore */ }
-    console.log('Order counter reset. Next order will be DP-001.');
+    console.log('Local order counter reset.');
 }
  
 function buildOrderMessage(order) {
@@ -958,8 +979,10 @@ function buildOrderMessage(order) {
     return `https://wa.me/${SHOP_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`;
 }
  
-function handleCheckoutSubmit(e) {
+let isPlacingOrder = false;
+async function handleCheckoutSubmit(e) {
     e.preventDefault();
+    if (isPlacingOrder) return;
  
     if (cart.length === 0) {
         showToast('Your cart is empty!');
@@ -987,8 +1010,12 @@ function handleCheckoutSubmit(e) {
  
     const t = calcTotals();
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    const form = e.target;
+    isPlacingOrder = true;
+    let orderRef;
+    try { orderRef = await getNextOrderRef(); } finally { isPlacingOrder = false; }
     const order = {
-        ref: getNextOrderRef(),
+        ref: orderRef,
         name: document.getElementById('coName').value.trim(),
         phone: phoneEl.value.trim(),
         address: document.getElementById('coAddress').value.trim(),
@@ -1034,7 +1061,7 @@ function handleCheckoutSubmit(e) {
     try {
         document.getElementById('couponCodeInput').value = '';
         document.getElementById('couponMsg').className = 'hidden';
-        e.target.reset();
+        form.reset();
         togglePaymentFields('COD');
     } catch (err) { console.error(err); }
     updateCartUI();
