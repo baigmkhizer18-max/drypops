@@ -616,6 +616,7 @@ function openProductDetail(productId) {
         </div>
     `;
     refreshWishlistUI();
+    renderReviews(product.id);
     showView('product-detail');
 }
  
@@ -636,6 +637,170 @@ function addDetailViewToCart(productId) {
     addToCart({ id: product.id, title: `${product.name} (${label})`, price: weightObj.price, weightLabel: label });
 }
  
+/* ===================== customer reviews (per product) ===================== */
+const REVIEWS_API = '/api/reviews';
+let reviewRating = 0;
+
+function starIcons(n) { return '<i class="fa-solid fa-star"></i>'.repeat(n); }
+
+// Gold stars filled up to the average (works for 4.3 etc.)
+function starsHtml(avg, sizeCls) {
+    const pct = Math.max(0, Math.min(100, (avg / 5) * 100));
+    return `<span class="relative inline-block leading-none ${sizeCls || ''}" role="img" aria-label="${avg.toFixed(1)} out of 5 stars">
+        <span class="whitespace-nowrap text-slate-300 dark:text-slate-600">${starIcons(5)}</span>
+        <span class="absolute inset-y-0 left-0 overflow-hidden whitespace-nowrap text-goldenHoney" style="width:${pct}%">${starIcons(5)}</span>
+    </span>`;
+}
+
+async function fetchReviews(productId) {
+    try {
+        const res = await fetch(`${REVIEWS_API}?product=${encodeURIComponent(productId)}`);
+        if (!res.ok) throw new Error('reviews api unavailable');
+        const data = await res.json();
+        return { list: Array.isArray(data.reviews) ? data.reviews : [], shared: true };
+    } catch (e) {
+        // Fallback while the API is not set up: reviews stay in this browser only.
+        return { list: loadStored('drypops-reviews-' + productId), shared: false };
+    }
+}
+
+async function renderReviews(productId) {
+    const detailView = document.getElementById('view-product-detail');
+    if (!detailView) return;
+    let section = document.getElementById('reviewsSection');
+    if (!section) {
+        section = document.createElement('div');
+        section.id = 'reviewsSection';
+        detailView.querySelector('.max-w-7xl').appendChild(section);
+    }
+    reviewRating = 0;
+    section.dataset.product = productId;
+    section.innerHTML = '<p class="text-center text-xs text-slate-400 py-10">Loading reviews...</p>';
+
+    const { list } = await fetchReviews(productId);
+    if (section.dataset.product !== productId) return; // user opened another product meanwhile
+
+    const total = list.length;
+    const counts = [0, 0, 0, 0, 0, 0];
+    list.forEach(r => { const n = Math.round(r.rating); if (n >= 1 && n <= 5) counts[n]++; });
+    const avg = total ? list.reduce((a, r) => a + Number(r.rating), 0) / total : 0;
+
+    const bars = [5, 4, 3, 2, 1].map(n => {
+        const pct = total ? (counts[n] / total) * 100 : 0;
+        return `<div class="flex items-center gap-3 text-xs">
+            <span class="w-3 text-right font-semibold">${n}</span>
+            <i class="fa-solid fa-star text-deepBrown dark:text-goldenLight"></i>
+            <div class="flex-1 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                <div class="h-full rounded-full bg-goldenHoney" style="width:${pct}%"></div>
+            </div>
+            <span class="w-6 text-left font-semibold">${counts[n]}</span>
+        </div>`;
+    }).join('');
+
+    const listHtml = total ? list.map(r => `
+        <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-goldenHoney/20 shadow-sm">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-full bg-olive/15 text-olive font-bold text-xs flex items-center justify-center">${escapeHtml((r.name || '?').trim().charAt(0).toUpperCase())}</span>
+                    <div>
+                        <p class="text-xs font-bold text-deepBrown dark:text-cream">${escapeHtml(r.name)}</p>
+                        <p class="text-[10px] text-slate-400">${r.date ? new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</p>
+                    </div>
+                </div>
+                ${starsHtml(Number(r.rating), 'text-xs')}
+            </div>
+            <p class="text-xs text-darkText/80 dark:text-slate-300 leading-relaxed mt-3 whitespace-pre-line">${escapeHtml(r.comment)}</p>
+        </div>`).join('')
+        : '<p class="text-center text-xs text-slate-400 py-6">No reviews yet. Be the first to review this product!</p>';
+
+    section.innerHTML = `
+        <div class="mt-16 pt-10 border-t border-goldenHoney/30">
+            <h2 class="text-2xl font-extrabold text-deepBrown dark:text-cream text-center">Customer Feedback</h2>
+            <div class="mt-6 max-w-sm mx-auto text-center">
+                <p class="text-6xl font-extrabold text-deepBrown dark:text-cream">${total ? avg.toFixed(1) : '0.0'}</p>
+                <div class="mt-2 text-2xl">${starsHtml(avg)}</div>
+                <p class="text-xs mt-2 text-darkText/70 dark:text-slate-400">(${total} review${total === 1 ? '' : 's'})</p>
+                <div class="mt-6 space-y-2">${bars}</div>
+                <button type="button" onclick="toggleReviewForm()" class="mt-7 bg-olive hover:bg-oliveHover text-white font-bold px-10 py-3 rounded-full text-xs shadow-lg transition-all hover:scale-105 active:scale-95 btn-shine">
+                    <i class="fa-solid fa-pen mr-1.5"></i> Write a review
+                </button>
+            </div>
+
+            <form id="reviewForm" onsubmit="submitReview(event, '${productId}')" class="hidden max-w-xl mx-auto mt-8 p-5 rounded-2xl bg-white dark:bg-slate-800 border border-goldenHoney/30 shadow-md space-y-4">
+                <div>
+                    <p class="text-xs font-bold text-deepBrown dark:text-goldenLight mb-2">Your rating</p>
+                    <div id="reviewStarPicker" class="flex gap-1 text-3xl text-slate-300 dark:text-slate-600">
+                        ${[1, 2, 3, 4, 5].map(n => `<button type="button" onclick="setReviewRating(${n})" aria-label="${n} star${n > 1 ? 's' : ''}" class="review-star hover:scale-110 transition-transform"><i class="fa-solid fa-star"></i></button>`).join('')}
+                    </div>
+                </div>
+                <div>
+                    <label for="reviewName" class="block text-xs font-bold text-deepBrown dark:text-goldenLight mb-1.5">Your name</label>
+                    <input id="reviewName" type="text" maxlength="40" required class="w-full bg-cream dark:bg-slate-700 text-xs p-3 rounded-xl border border-goldenHoney/40 focus:outline-none focus:border-goldenHoney">
+                </div>
+                <div>
+                    <label for="reviewComment" class="block text-xs font-bold text-deepBrown dark:text-goldenLight mb-1.5">Your feedback (good or bad - be honest)</label>
+                    <textarea id="reviewComment" rows="4" maxlength="500" required placeholder="How was the quality, taste and packing?" class="w-full bg-cream dark:bg-slate-700 text-xs p-3 rounded-xl border border-goldenHoney/40 focus:outline-none focus:border-goldenHoney"></textarea>
+                </div>
+                <input type="text" id="reviewWebsite" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
+                <button id="reviewSubmitBtn" type="submit" class="w-full bg-olive hover:bg-oliveHover text-white font-bold py-3 rounded-xl text-xs shadow-md transition-all active:scale-95">Submit Review</button>
+            </form>
+
+            <div class="max-w-2xl mx-auto mt-10 space-y-3">${listHtml}</div>
+        </div>`;
+}
+
+function toggleReviewForm() {
+    const f = document.getElementById('reviewForm');
+    if (!f) return;
+    f.classList.toggle('hidden');
+    if (!f.classList.contains('hidden')) f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function setReviewRating(n) {
+    reviewRating = n;
+    document.querySelectorAll('#reviewStarPicker .review-star').forEach((b, i) => {
+        b.classList.toggle('text-goldenHoney', i < n);
+    });
+}
+
+async function submitReview(e, productId) {
+    e.preventDefault();
+    if (document.getElementById('reviewWebsite').value) return; // spam bot
+    if (!reviewRating) { showToast('Please select a star rating'); return; }
+
+    const done = loadStored('drypops-reviewed');
+    if (done.includes(productId)) { showToast('You have already reviewed this product'); return; }
+
+    const review = {
+        product: productId,
+        rating: reviewRating,
+        name: document.getElementById('reviewName').value.trim().slice(0, 40),
+        comment: document.getElementById('reviewComment').value.trim().slice(0, 500),
+        date: new Date().toISOString()
+    };
+    if (!review.name || !review.comment) return;
+
+    const btn = document.getElementById('reviewSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    try {
+        const res = await fetch(REVIEWS_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(review)
+        });
+        if (!res.ok) throw new Error('post failed');
+    } catch (err) {
+        // API not available: keep it in this browser only
+        const local = loadStored('drypops-reviews-' + productId);
+        local.unshift(review);
+        saveStored('drypops-reviews-' + productId, local);
+    }
+    done.push(productId);
+    saveStored('drypops-reviewed', done);
+    showToast('Thank you for your review!');
+    renderReviews(productId);
+}
+
 /* ===================== custom gift box ===================== */
 function renderBoxBuilderOptions() {
     const container = document.getElementById('boxBuilderOptions');
