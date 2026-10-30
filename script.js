@@ -638,7 +638,11 @@ function addDetailViewToCart(productId) {
 }
  
 /* ===================== customer reviews (per product) ===================== */
-const REVIEWS_API = '/api/reviews';
+// ---- Firebase Firestore (shared reviews) - fill these two values from your Firebase project ----
+const FIREBASE_PROJECT_ID = 'YOUR_PROJECT_ID';
+const FIREBASE_API_KEY = 'YOUR_WEB_API_KEY';
+const FS_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+const reviewsConfigured = () => !FIREBASE_PROJECT_ID.startsWith('YOUR_') && !FIREBASE_API_KEY.startsWith('YOUR_');
 let reviewRating = 0;
 
 function starIcons(n) { return '<i class="fa-solid fa-star"></i>'.repeat(n); }
@@ -653,14 +657,34 @@ function starsHtml(avg, sizeCls) {
 }
 
 async function fetchReviews(productId) {
+    if (!reviewsConfigured()) return { list: [], shared: false };
     try {
-        const res = await fetch(`${REVIEWS_API}?product=${encodeURIComponent(productId)}`);
-        if (!res.ok) throw new Error('reviews api unavailable');
-        const data = await res.json();
-        return { list: Array.isArray(data.reviews) ? data.reviews : [], shared: true };
+        const res = await fetch(`${FS_BASE}:runQuery?key=${FIREBASE_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                structuredQuery: {
+                    from: [{ collectionId: 'reviews' }],
+                    where: { fieldFilter: { field: { fieldPath: 'product' }, op: 'EQUAL', value: { stringValue: String(productId) } } },
+                    limit: 300
+                }
+            })
+        });
+        if (!res.ok) throw new Error('reviews unavailable');
+        const rows = await res.json();
+        const list = rows.filter(r => r.document).map(r => {
+            const f = r.document.fields || {};
+            return {
+                product: f.product && f.product.stringValue,
+                rating: f.rating ? Number(f.rating.integerValue) : 0,
+                name: f.name ? f.name.stringValue : '',
+                comment: f.comment ? f.comment.stringValue : '',
+                date: f.date ? f.date.stringValue : ''
+            };
+        }).sort((x, y) => String(y.date).localeCompare(String(x.date)));
+        return { list, shared: true };
     } catch (e) {
-        // Fallback while the API is not set up: reviews stay in this browser only.
-        return { list: loadStored('drypops-reviews-' + productId), shared: false };
+        return { list: [], shared: false };
     }
 }
 
@@ -783,17 +807,26 @@ async function submitReview(e, productId) {
     const btn = document.getElementById('reviewSubmitBtn');
     btn.disabled = true; btn.textContent = 'Submitting...';
     try {
-        const res = await fetch(REVIEWS_API, {
+        if (!reviewsConfigured()) throw new Error('not configured');
+        const res = await fetch(`${FS_BASE}/reviews?key=${FIREBASE_API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(review)
+            body: JSON.stringify({
+                fields: {
+                    product: { stringValue: review.product },
+                    rating: { integerValue: String(review.rating) },
+                    name: { stringValue: review.name },
+                    comment: { stringValue: review.comment },
+                    date: { stringValue: review.date }
+                }
+            })
         });
         if (!res.ok) throw new Error('post failed');
     } catch (err) {
-        // API not available: keep it in this browser only
-        const local = loadStored('drypops-reviews-' + productId);
-        local.unshift(review);
-        saveStored('drypops-reviews-' + productId, local);
+        // Do NOT pretend it worked: a review saved only in this browser is invisible to everyone else.
+        showToast('Could not submit your review. Please try again.');
+        btn.disabled = false; btn.textContent = 'Submit Review';
+        return;
     }
     done.push(productId);
     saveStored('drypops-reviewed', done);
