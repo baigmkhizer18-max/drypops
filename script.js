@@ -807,7 +807,12 @@ async function submitReview(e, productId) {
     const btn = document.getElementById('reviewSubmitBtn');
     btn.disabled = true; btn.textContent = 'Submitting...';
     try {
-        if (!reviewsConfigured()) throw new Error('not configured');
+        if (!reviewsConfigured()) {
+            console.error('[Reviews] Firebase keys missing: set FIREBASE_PROJECT_ID and FIREBASE_API_KEY in script.js');
+            showToast('Reviews are not set up yet. Owner: add Firebase keys in script.js');
+            btn.disabled = false; btn.textContent = 'Submit Review';
+            return;
+        }
         const res = await fetch(`${FS_BASE}/reviews?key=${FIREBASE_API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -821,10 +826,18 @@ async function submitReview(e, productId) {
                 }
             })
         });
-        if (!res.ok) throw new Error('post failed');
+        if (!res.ok) {
+            const detail = await res.text().catch(() => '');
+            console.error('[Reviews] Firestore rejected the review:', res.status, detail);
+            const hint = res.status === 403 ? ' (database rules not published)'
+                       : res.status === 404 ? ' (database not created / wrong project id)'
+                       : res.status === 400 ? ' (wrong API key / project id)' : '';
+            throw new Error('HTTP ' + res.status + hint);
+        }
     } catch (err) {
         // Do NOT pretend it worked: a review saved only in this browser is invisible to everyone else.
-        showToast('Could not submit your review. Please try again.');
+        console.error('[Reviews] submit failed:', err);
+        showToast('Could not submit your review: ' + (err && err.message ? err.message : 'network error'));
         btn.disabled = false; btn.textContent = 'Submit Review';
         return;
     }
