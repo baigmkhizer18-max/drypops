@@ -638,11 +638,17 @@ function addDetailViewToCart(productId) {
 }
  
 /* ===================== customer reviews (per product) ===================== */
-// ---- Firebase Firestore (shared reviews) - fill these two values from your Firebase project ----
-const FIREBASE_PROJECT_ID = 'YOUR_PROJECT_ID';
-const FIREBASE_API_KEY = 'YOUR_WEB_API_KEY';
-const FS_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
-const reviewsConfigured = () => !FIREBASE_PROJECT_ID.startsWith('YOUR_') && !FIREBASE_API_KEY.startsWith('YOUR_');
+// ---- Customer reviews (no database needed) ----
+// Add ONLY real reviews that customers gave you (e.g. on WhatsApp).
+// "product" must match the product id, e.g. 'df-2' = Sweet Raisins.
+// Product ids: df-2 Sweet Raisins | df-3 Dry Dates | df-4 Dry Dates (N) | ol-1 Mustard Oil |
+// ol-2 Coconut Oil | ol-3 Almond Oil | ol-4 Olive Oil | hn-1 Pure Swat Honey | sd-1 Chia |
+// sd-2 Sunflower | sd-3 Pumpkin | sd-4 Melon | sd-5 Oats | sd-6 White Sesame |
+// sl-1 Coarse Pink Salt | sl-2 Black Salt | sl-3 Refined Pink Salt | tl-1 Lemon Grass Tea |
+// hb-1 Moringa Powder | sn-1 Roasted Chickpeas
+const STATIC_REVIEWS = [
+    // { product: 'df-2', rating: 5, name: 'Customer Name', comment: 'Paste the real review text here.', date: '2026-10-30' },
+];
 let reviewRating = 0;
 
 function starIcons(n) { return '<i class="fa-solid fa-star"></i>'.repeat(n); }
@@ -657,35 +663,10 @@ function starsHtml(avg, sizeCls) {
 }
 
 async function fetchReviews(productId) {
-    if (!reviewsConfigured()) return { list: [], shared: false };
-    try {
-        const res = await fetch(`${FS_BASE}:runQuery?key=${FIREBASE_API_KEY}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                structuredQuery: {
-                    from: [{ collectionId: 'reviews' }],
-                    where: { fieldFilter: { field: { fieldPath: 'product' }, op: 'EQUAL', value: { stringValue: String(productId) } } },
-                    limit: 300
-                }
-            })
-        });
-        if (!res.ok) throw new Error('reviews unavailable');
-        const rows = await res.json();
-        const list = rows.filter(r => r.document).map(r => {
-            const f = r.document.fields || {};
-            return {
-                product: f.product && f.product.stringValue,
-                rating: f.rating ? Number(f.rating.integerValue) : 0,
-                name: f.name ? f.name.stringValue : '',
-                comment: f.comment ? f.comment.stringValue : '',
-                date: f.date ? f.date.stringValue : ''
-            };
-        }).sort((x, y) => String(y.date).localeCompare(String(x.date)));
-        return { list, shared: true };
-    } catch (e) {
-        return { list: [], shared: false };
-    }
+    const list = STATIC_REVIEWS
+        .filter(r => r.product === String(productId))
+        .sort((x, y) => String(y.date).localeCompare(String(x.date)));
+    return { list, shared: true };
 }
 
 async function renderReviews(productId) {
@@ -792,59 +773,20 @@ async function submitReview(e, productId) {
     if (document.getElementById('reviewWebsite').value) return; // spam bot
     if (!reviewRating) { showToast('Please select a star rating'); return; }
 
-    const done = loadStored('drypops-reviewed');
-    if (done.includes(productId)) { showToast('You have already reviewed this product'); return; }
+    const p = getProduct(productId);
+    const name = document.getElementById('reviewName').value.trim().slice(0, 40);
+    const comment = document.getElementById('reviewComment').value.trim().slice(0, 500);
+    if (!name || !comment) return;
 
-    const review = {
-        product: productId,
-        rating: reviewRating,
-        name: document.getElementById('reviewName').value.trim().slice(0, 40),
-        comment: document.getElementById('reviewComment').value.trim().slice(0, 500),
-        date: new Date().toISOString()
-    };
-    if (!review.name || !review.comment) return;
+    // The review is sent to the shop's WhatsApp. The owner checks it and, if it is
+    // genuine, adds it to STATIC_REVIEWS above so it shows on the website.
+    const text = `New review for ${p ? p.name : productId}\nRating: ${reviewRating}/5\nName: ${name}\nComment: ${comment}`;
+    window.open(`https://wa.me/${SHOP_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+    showToast('Press Send in WhatsApp to submit your review. Thank you!');
 
-    const btn = document.getElementById('reviewSubmitBtn');
-    btn.disabled = true; btn.textContent = 'Submitting...';
-    try {
-        if (!reviewsConfigured()) {
-            console.error('[Reviews] Firebase keys missing: set FIREBASE_PROJECT_ID and FIREBASE_API_KEY in script.js');
-            showToast('Reviews are not set up yet. Owner: add Firebase keys in script.js');
-            btn.disabled = false; btn.textContent = 'Submit Review';
-            return;
-        }
-        const res = await fetch(`${FS_BASE}/reviews?key=${FIREBASE_API_KEY}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                fields: {
-                    product: { stringValue: review.product },
-                    rating: { integerValue: String(review.rating) },
-                    name: { stringValue: review.name },
-                    comment: { stringValue: review.comment },
-                    date: { stringValue: review.date }
-                }
-            })
-        });
-        if (!res.ok) {
-            const detail = await res.text().catch(() => '');
-            console.error('[Reviews] Firestore rejected the review:', res.status, detail);
-            const hint = res.status === 403 ? ' (database rules not published)'
-                       : res.status === 404 ? ' (database not created / wrong project id)'
-                       : res.status === 400 ? ' (wrong API key / project id)' : '';
-            throw new Error('HTTP ' + res.status + hint);
-        }
-    } catch (err) {
-        // Do NOT pretend it worked: a review saved only in this browser is invisible to everyone else.
-        console.error('[Reviews] submit failed:', err);
-        showToast('Could not submit your review: ' + (err && err.message ? err.message : 'network error'));
-        btn.disabled = false; btn.textContent = 'Submit Review';
-        return;
-    }
-    done.push(productId);
-    saveStored('drypops-reviewed', done);
-    showToast('Thank you for your review!');
-    renderReviews(productId);
+    const form = document.getElementById('reviewForm');
+    if (form) { form.reset(); form.classList.add('hidden'); }
+    setReviewRating(0);
 }
 
 /* ===================== custom gift box ===================== */
