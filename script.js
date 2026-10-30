@@ -317,7 +317,7 @@ const SHOP_CONFIG = {
 };
  
 const PLACEHOLDER_IMG = "data:image/svg+xml;utf8," + encodeURIComponent(
-    "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='400' height='400' fill='#FAF6F0'/>" +
+    "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='400' height='400' fill='#FFFFFF'/>" +
     "<text x='200' y='215' font-size='64' text-anchor='middle'>🌿</text></svg>");
  
 const PAYMENT_LABELS = { COD: 'Cash on Delivery', WALLET: 'JazzCash / Easypaisa' };
@@ -503,7 +503,7 @@ function renderHomePageProducts() {
         const sectionId = cat.toLowerCase().replace(' ', '-');
  
         return `
-            <section id="${sectionId}" data-category="${cat}" class="category-section py-14 ${idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-cream dark:bg-slate-950'} border-t border-goldenHoney/20">
+            <section id="${sectionId}" data-category="${cat}" class="category-section py-14 bg-white ${idx % 2 === 0 ? 'dark:bg-slate-900' : 'dark:bg-slate-950'} border-t border-goldenHoney/20">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="mb-8" data-aos="fade-right">
                         <span class="text-xs font-bold uppercase tracking-widest text-olive bg-olive/10 px-3 py-1 rounded-full">Category 0${idx + 1}</span>
@@ -514,7 +514,7 @@ function renderHomePageProducts() {
                             const defaultWeight = p.weights[0];
                             const soldOut = p.stock <= 0;
                             return `
-                            <div class="interactive-card bg-cream/60 dark:bg-slate-800 rounded-2xl border border-goldenHoney/30 p-4 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="${(pIdx + 1) * 100}">
+                            <div class="interactive-card bg-white shadow-sm dark:bg-slate-800 rounded-2xl border border-goldenHoney/30 p-4 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="${(pIdx + 1) * 100}">
                                 <div>
                                     <div class="relative overflow-hidden rounded-xl bg-white dark:bg-slate-700 mb-3">
                                         <img src="${imgSrc(p)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.onerror=null;this.src=PLACEHOLDER_IMG" class="block w-full h-auto group-hover:scale-105 transition-transform duration-700">
@@ -591,7 +591,7 @@ function openProductDetail(productId) {
  
             <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-goldenHoney/30 shadow-sm">
                 <label for="detailWeightSelect" class="block text-xs font-bold text-deepBrown dark:text-goldenLight mb-2">Choose Weight / Pack Size:</label>
-                <select id="detailWeightSelect" onchange="updateDetailPrice('${product.id}', this.value)" class="w-full bg-cream dark:bg-slate-700 text-xs font-bold p-3 rounded-xl border border-goldenHoney/40 focus:outline-none focus:border-goldenHoney">
+                <select id="detailWeightSelect" onchange="updateDetailPrice('${product.id}', this.value)" class="w-full bg-white dark:bg-slate-700 text-xs font-bold p-3 rounded-xl border border-goldenHoney/40 focus:outline-none focus:border-goldenHoney">
                     ${product.weights.map(w => `<option value="${w.label}">${w.label} - ${formatPrice(w.price)}</option>`).join('')}
                 </select>
             </div>
@@ -810,7 +810,7 @@ function renderBoxBuilderOptions() {
         <div class="interactive-card bg-white dark:bg-slate-800 p-4 rounded-2xl border border-goldenHoney/30 flex flex-col justify-between">
             <div>
                 <h4 class="font-bold text-sm text-deepBrown dark:text-cream">${escapeHtml(p.name)}</h4>
-                <select id="box-weight-${p.id}" aria-label="Weight for ${escapeHtml(p.name)}" class="mt-2 w-full bg-cream dark:bg-slate-700 text-xs p-2 rounded-xl border border-goldenHoney/30 focus:outline-none focus:border-goldenHoney">
+                <select id="box-weight-${p.id}" aria-label="Weight for ${escapeHtml(p.name)}" class="mt-2 w-full bg-white dark:bg-slate-700 text-xs p-2 rounded-xl border border-goldenHoney/30 focus:outline-none focus:border-goldenHoney">
                     ${p.weights.map(w => `<option value="${w.label}">${w.label} - ${formatPrice(w.price)}</option>`).join('')}
                 </select>
             </div>
@@ -897,7 +897,7 @@ function renderDeals() {
     const el = document.getElementById('dealsContainer');
     if (!el) return;
     el.innerHTML = DEALS.map((d, i) => `
-        <div class="interactive-card bg-cream/60 dark:bg-slate-800 rounded-3xl border-2 border-goldenHoney/40 p-6 flex flex-col justify-between" data-aos="fade-up" data-aos-delay="${(i + 1) * 100}">
+        <div class="interactive-card bg-white shadow-sm dark:bg-slate-800 rounded-3xl border-2 border-goldenHoney/40 p-6 flex flex-col justify-between" data-aos="fade-up" data-aos-delay="${(i + 1) * 100}">
             <div>
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="font-extrabold text-lg text-deepBrown dark:text-cream">${escapeHtml(d.title)}</h3>
