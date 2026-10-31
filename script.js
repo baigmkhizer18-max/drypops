@@ -262,6 +262,21 @@ const DB_API = {
             ]
         },
         { 
+            id: 'sd-7', 
+            name: 'Flax Seeds', 
+            category: 'Seeds', 
+            stock: 50, 
+            image: 'images/FLAX (1).png', 
+            desc: 'Clean whole flax seeds (Alsi), rich in plant-based Omega-3 and fiber.',
+            nutrition: 'Fiber: 27g, Protein: 18g, Omega-3 (ALA): 22g (per 100g)',
+            benefits: 'Supports heart health, aids digestion, and is easy to add to smoothies, yogurt and baking.',
+            weights: [
+                { label: '50g', price: 250 },
+                { label: '100g', price: 450 },
+                { label: '200g', price: 800 }
+            ]
+        },
+        { 
             id: 'sl-3', 
             name: 'Refined Pink Salt', 
             category: 'Salt', 
@@ -1478,6 +1493,7 @@ function showToast(msg) {
         'tl-1': ['lemon grass', 'lemongrass', 'lemon grass tea', 'lemongrass tea', 'herbal tea', 'tea'],
         'df-4': ['dry dates n', 'dates n', 'dry dates (n)'],
         'sd-6': ['white sesame', 'sesame', 'sesame seeds', 'til', 'safed til'],
+        'sd-7': ['flax', 'flax seeds', 'flaxseed', 'flaxseeds', 'alsi'],
         'sl-3': ['refined pink salt', 'refined salt', 'refined pink'],
         'hb-1': ['moringa', 'moringa powder', 'sohanjna'],
         'sn-1': ['chickpeas', 'chickpea', 'chana', 'bhuna chana', 'roasted chana', 'roasted chickpeas']
