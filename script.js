@@ -870,25 +870,25 @@ const DEALS = [
         title: 'Deal 1: 4 Seeds (All 100g)',
         items: ['Chia 100g', 'Pumpkin 100g', 'Flax 100g', 'Sunflower 100g'],
         components: ['sd-1', 'sd-3', 'sd-2'],
-        price: 1375,
-        text: 'Buy a Pack of Four for Rs. 1,375 and Get a Surprise Gift!'
+        price: 1800,
+        text: 'Buy a Pack of Four for Rs. 1,800 and Get a Surprise Gift!'
     },
     {
         id: 'deal-5x50',
         title: 'Deal 2: 5 Seeds (All 50g)',
         items: ['Chia 50g', 'Flax 50g', 'Melon 50g', 'Pumpkin 50g', 'Sunflower 50g'],
         components: ['sd-1', 'sd-4', 'sd-3', 'sd-2'],
-        price: 900,
-        text: 'Buy 5 Packs for Rs. 900 and Get a Surprise Gift!'
+        price: 1250,
+        text: 'Buy 5 Packs for Rs. 1250 and Get a Surprise Gift!'
     },
     {
         id: 'deal-weekend',
         title: 'Weekend Deal',
         items: ['Chia Seeds 100g', 'Pumpkin Seeds 100g', 'Flax Seeds 100g', 'Sunflower Seeds 100g', 'Honey 125g'],
         components: ['sd-1', 'sd-3', 'sd-2', 'hn-1'],
-        price: 1500,
+        price: 2000,
         gift: false,
-        text: 'Weekend Special: 4 Seeds + Honey for Rs. 1,500 only!'
+        text: 'Weekend Special: 4 Seeds + Honey for Rs. 2000 only!'
     }
 ];
  
