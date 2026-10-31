@@ -10,8 +10,8 @@ const DB_API = {
             nutrition: 'Energy: 299 kcal, Potassium: 749mg, Fiber: 3.7g (per 100g)',
             benefits: 'Aids digestive health, supports iron absorption, and works as an instant energy boost.',
             weights: [
-                { label: '100g', price: 250 },
-                { label: '200g', price: 500 },
+                { label: '100g', price: 350 },
+                { label: '200g', price: 550 },
                 { label: '500g', price: 1250 }
             ]
         },
@@ -25,9 +25,9 @@ const DB_API = {
             nutrition: 'Energy: 282 kcal, Potassium: 656mg, Fiber: 8g (per 100g)',
             benefits: 'Gives instant natural energy, supports digestion, and is rich in iron and minerals.',
             weights: [
-                { label: '250g', price: 200 },
-                { label: '500g', price: 350 },
-                { label: '1kg', price: 675 }
+                { label: '250g', price: 300 },
+                { label: '500g', price: 500 },
+                { label: '1kg', price: 750 }
             ]
         },
         { 
@@ -40,8 +40,8 @@ const DB_API = {
             nutrition: 'Monounsaturated Fats: 60%, Omega-3 & Omega-6 balance.',
             benefits: 'Stimulates hair growth, improves cardiovascular wellness, and enhances meal flavor.',
             weights: [
-                { label: '100ml', price: 200 },
-                { label: '200ml', price: 400 }
+                { label: '100ml', price: 300 },
+                { label: '200ml', price: 450 }
             ]
         },
         { 
@@ -54,8 +54,8 @@ const DB_API = {
             nutrition: 'Lauric Acid: 50%, Healthy MCT Fatty Acids.',
             benefits: 'Deeply nourishes skin, boosts metabolic rate, and conditions dry hair naturally.',
             weights: [
-                { label: '100ml', price: 300 },
-                { label: '200ml', price: 500 }
+                { label: '100ml', price: 350 },
+                { label: '200ml', price: 600 }
             ]
         },
         { 
@@ -68,8 +68,8 @@ const DB_API = {
             nutrition: 'High Vitamin E concentration, Omega-9 oleic acid.',
             benefits: 'Enhances facial glow, relieves constipation when consumed, and soothes scalp.',
             weights: [
-                { label: '100ml', price: 800 },
-                { label: '200ml', price: 1550 }
+                { label: '100ml', price: 900 },
+                { label: '200ml', price: 1750 }
             ]
         },
         { 
@@ -82,8 +82,8 @@ const DB_API = {
             nutrition: 'Monounsaturated Fats: 73%, Rich in Vitamin E and polyphenol antioxidants.',
             benefits: 'Supports heart health, reduces inflammation, and nourishes skin and hair.',
             weights: [
-                { label: '100ml', price: 350 },
-                { label: '200ml', price: 700 }
+                { label: '100ml', price: 450 },
+                { label: '200ml', price: 800 }
             ]
         },
         { 
@@ -96,7 +96,7 @@ const DB_API = {
             nutrition: 'Natural Fructose & Glucose, Enzymes, Antimicrobial Agents.',
             benefits: 'Soothes sore throats, reinforces immune system, and acts as a natural sweetener.',
             weights: [
-                { label: '125g', price: 225 },
+                { label: '125g', price: 300 },
                 { label: '250g', price: 400 },
                 { label: '500g', price: 750 }
             ]
@@ -111,8 +111,8 @@ const DB_API = {
             nutrition: 'Fiber: 34g, Protein: 16.5g, Omega-3: 17.8g (per 100g)',
             benefits: 'Supports weight management, keeps hydration levels high, and regulates digestion.',
             weights: [
-                { label: '50g', price: 275 },
-                { label: '100g', price: 525 },
+                { label: '50g', price: 300 },
+                { label: '100g', price: 575 },
                 { label: '200g', price: 1000 }
             ]
         },
@@ -126,8 +126,8 @@ const DB_API = {
             nutrition: 'Vitamin E: 234% DV, Selenium, Healthy Unsaturated Fats.',
             benefits: 'Reduces inflammation, improves heart health, and promotes skin elasticity.',
             weights: [
-                { label: '50g', price: 210 },
-                { label: '100g', price: 410 },
+                { label: '50g', price: 250 },
+                { label: '100g', price: 450 },
                 { label: '200g', price: 800 }
             ]
         },
@@ -141,9 +141,9 @@ const DB_API = {
             nutrition: 'Zinc, Magnesium: 150mg, Iron, Protein: 30g (per 100g)',
             benefits: 'Improves sleep quality, balances hormones, and boosts immunity.',
             weights: [
-                { label: '50g', price: 200 },
-                { label: '100g', price: 395 },
-                { label: '200g', price: 750 }
+                { label: '50g', price: 300 },
+                { label: '100g', price: 450 },
+                { label: '200g', price: 800 }
             ]
         },
         { 
@@ -156,8 +156,8 @@ const DB_API = {
             nutrition: 'Rich in B-Complex vitamins, Copper, and Essential Minerals.',
             benefits: 'Nourishes brain tissue, supports kidney health, and enhances dessert dishes.',
             weights: [
-                { label: '50g', price: 220 },
-                { label: '100g', price: 425 },
+                { label: '50g', price: 300 },
+                { label: '100g', price: 450 },
                 { label: '200g', price: 800 }
             ]
         },
@@ -171,9 +171,9 @@ const DB_API = {
             nutrition: 'Energy: 389 kcal, Protein: 17g, Fiber: 10g (per 100g)',
             benefits: 'Keeps you full for longer, supports heart health, and gives steady natural energy.',
             weights: [
-                { label: '250g', price: 150 },
-                { label: '500g', price: 225 },
-                { label: '1kg', price: 400 }
+                { label: '250g', price: 250 },
+                { label: '500g', price: 350 },
+                { label: '1kg', price: 550 }
             ]
         },
         { 
@@ -186,8 +186,7 @@ const DB_API = {
             nutrition: 'Sodium: ~38g, naturally contains trace minerals like magnesium, calcium and potassium (per 100g).',
             benefits: 'Adds rich flavor to food, provides trace minerals, and is a purer alternative to refined table salt.',
             weights: [
-                { label: '385g', price: 150 },
-                
+                { label: '385g', price: 275 }
             ]
         },
         { 
@@ -200,8 +199,7 @@ const DB_API = {
             nutrition: 'Sodium: ~36g, contains sulphur compounds and trace minerals (per 100g).',
             benefits: 'Aids digestion, helps relieve bloating and gas, and adds a unique taste to snacks.',
             weights: [
-                { label: '385g', price: 150 },
-               
+                { label: '385g', price: 275 }
             ]
         },
         { 
@@ -214,8 +212,8 @@ const DB_API = {
             nutrition: 'Caffeine-free and almost zero calories per cup when taken without sugar.',
             benefits: 'A warm, refreshing herbal drink that helps you relax and feel light after meals. Best enjoyed with a spoon of honey.',
             weights: [
-                { label: '50g', price: 225 },
-                { label: '100g', price: 425 },
+                { label: '50g', price: 300 },
+                { label: '100g', price: 450 },
                 { label: '200g', price: 800 }
             ]
         },
@@ -229,9 +227,9 @@ const DB_API = {
             nutrition: 'Energy: 364 kcal, Protein: 19g, Fiber: 17g (per 100g)',
             benefits: 'A filling, high-protein snack that supports digestion and keeps hunger away between meals.',
             weights: [
-                { label: '250g', price: 350 },
-                { label: '500g', price: 650 },
-                { label: '1kg', price: 1200 }
+                { label: '250g', price: 450 },
+                { label: '500g', price: 700 },
+                { label: '1kg', price: 1300 }
             ]
         },
         { 
@@ -244,7 +242,7 @@ const DB_API = {
             nutrition: 'Rich in natural sugars, fiber, potassium and iron.',
             benefits: 'Gives instant natural energy, supports digestion, and is a healthy alternative to sugary snacks.',
             weights: [
-                { label: '250g', price: 400 },
+                { label: '250g', price: 450 },
                 { label: '500g', price: 750 },
                 { label: '1kg', price: 1400 }
             ]
@@ -259,8 +257,8 @@ const DB_API = {
             nutrition: 'Rich in calcium, healthy fats, copper and magnesium.',
             benefits: 'Supports bone health, adds a nutty flavor to meals, and is a good source of healthy fats.',
             weights: [
-                { label: '100g', price: 250 },
-                { label: '200g', price: 350 }
+                { label: '100g', price: 300 },
+                { label: '200g', price: 500 }
             ]
         },
         { 
@@ -273,9 +271,7 @@ const DB_API = {
             nutrition: 'Sodium: ~38g, contains trace minerals (per 100g).',
             benefits: 'Fine texture dissolves quickly in food and adds a mild, balanced salty flavor.',
             weights: [
-                { label: '385g', price: 150 },
-                { label: '1kg', price: 200 },
-                
+                { label: '1kg', price: 325 }
             ]
         },
         { 
@@ -288,9 +284,9 @@ const DB_API = {
             nutrition: 'Rich in iron, calcium, vitamin A and vitamin C, with natural plant antioxidants.',
             benefits: 'Supports natural energy, boosts daily nutrition, and blends easily into drinks and food.',
             weights: [
-                { label: '50g', price: 150 },
-                { label: '100g', price: 275 },
-                { label: '200g', price: 400 }
+                { label: '50g', price: 250 },
+                { label: '100g', price: 400 },
+                { label: '200g', price: 600 }
             ]
         }
     ],
